@@ -34,34 +34,34 @@ Coord::~Coord()
 {
 }
 
-int Coord::x()
+int Coord::x() const
 {
     return X;
 }
 
-int Coord::y()
+int Coord::y() const
 {
     return Y;
 }
 
-bool Coord::checkBounds()
+bool Coord::checkBounds() const
 {
     return (X >= 0) && (X <= 7) && (Y >= 0) && (Y <= 7);
 }
 
-bool Coord::operator==(Coord &other)
+bool Coord::operator==(const Coord &other) const
 {
     return (X == other.X) && (Y == other.Y);
 }
 
-Coord &Coord::operator+(Coord &other)
+Coord &Coord::operator+(const Coord &other)
 {
     X += other.X;
     Y += other.Y;
     return *this;
 }
 
-Coord &Coord::operator-(Coord &other)
+Coord &Coord::operator-(const Coord &other)
 {
     X -= other.X;
     Y -= other.Y;

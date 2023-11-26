@@ -14,13 +14,13 @@ class Coord
     Coord &operator=(Coord &&other);
     ~Coord();
 
-    int x();
-    int y();
+    int x() const;
+    int y() const;
 
-    bool checkBounds();
-    bool operator==(Coord &other);
-    Coord &operator+(Coord &other);
-    Coord &operator-(Coord &other);
+    bool checkBounds() const;
+    bool operator==(const Coord &other) const;
+    Coord &operator+(const Coord &other);
+    Coord &operator-(const Coord &other);
     Coord &operator*(int scale);
 };
 
