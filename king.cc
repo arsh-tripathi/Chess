@@ -1,12 +1,16 @@
 #include "king.h"
+#include "coord.h"
 #include "enums.h"
 #include "piece.h"
 #include <vector>
 
 using namespace std;
 
-static const vector<Coord> ALLMOVES{Coord{1, 1}, Coord{1, -1}, Coord{1, 0},   Coord{0, -1},
-                                    Coord{0, 1}, Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}};
+static const vector<Coord> FIRSTMOVES{Coord{1, 1},  Coord{1, -1},  Coord{1, 0},  Coord{0, -1}, Coord{0, 1},
+                                      Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}, Coord{2, 0},  Coord{-2, 0}};
+static const vector<Coord> FURTHERMOVES{Coord{1, 1}, Coord{1, -1}, Coord{1, 0},   Coord{0, -1},
+                                        Coord{0, 1}, Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}};
+static const vector<Coord> ALLMOVES & = FIRSTMOVES;
 
 King::King(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -23,6 +27,14 @@ PieceType King::getPieceType()
 
 vector<Coord> King::possibleMoves()
 {
+    if (!moveCounter)
+    {
+        ALLMOVES = FIRSTMOVES;
+    }
+    else
+    {
+        ALLMOVES = FURTHERMOVES;
+    }
     vector<Coord> moves;
     for (int i = 0; i < ALLMOVES.size(); ++i)
     {
@@ -37,6 +49,14 @@ vector<Coord> King::possibleMoves()
 
 bool King::isMovePossible(Coord &c)
 {
+    if (!moveCounter)
+    {
+        ALLMOVES = FIRSTMOVES;
+    }
+    else
+    {
+        ALLMOVES = FURTHERMOVES;
+    }
     if (!c.checkBounds())
     {
         // final destination is out of bouinds

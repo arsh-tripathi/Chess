@@ -5,7 +5,7 @@
 
 using namespace std;
 
-static const vector<Coord> FIRSTMOVE{Coord{1, 0}, Coord{2, 0}, Coord{1, 1}, Coord{1, -1}};
+static const vector<Coord> FIRSTMOVE{Coord{0, 1}, Coord{0, 2}, Coord{1, 1}, Coord{-1, 1}};
 static const vector<Coord> FURTHERMOVES{Coord{1, 0}, Coord{1, 1}, Coord{1, -1}};
 static const vector<Coord> &ALLMOVES;
 
@@ -24,7 +24,7 @@ PieceType Pawn::getPieceType()
 
 vector<Coord> Pawn::possibleMoves()
 {
-    if (!hasMoved)
+    if (!moveCounter)
     {
         ALLMOVES = FIRSTMOVE;
     }
@@ -46,7 +46,7 @@ vector<Coord> Pawn::possibleMoves()
 
 bool Pawn::isMovePossible(Coord &c)
 {
-    if (!hasMoved)
+    if (!moveCounter)
     {
         ALLMOVES = FIRSTMOVE;
     }
