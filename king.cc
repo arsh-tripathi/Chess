@@ -5,8 +5,8 @@
 
 using namespace std;
 
-static const vector<Coord> ALLMOVES{Coord{1, 1},  Coord{1, -1},  Coord{1, 1},   Coord{1, -1},
-                                    Coord{-1, 1}, Coord{-1, -1}, Coord{-1, -1}, Coord{-1, 1}};
+static const vector<Coord> ALLMOVES{Coord{1, 1}, Coord{1, -1}, Coord{1, 0},   Coord{0, -1},
+                                    Coord{0, 1}, Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}};
 
 King::King(Coord pos, Colour colour) : Piece{pos, colour}
 {
