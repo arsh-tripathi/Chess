@@ -1,17 +1,17 @@
-#ifndef __PAWN_H__
-#define __PAWN_H__
+#ifndef __BISHOP_H__
+#define __BISHOP_H__
 
 #include "enums.h"
 #include "piece.h"
 #include <vector>
 
-class Pawn : public Piece
+class Bishop : public Piece
 {
 
   public:
     // ctor/dtor
-    Pawn(Coord pos, Colour colour);
-    ~Pawn();
+    Bishop(Coord pos, Colour colour);
+    ~Bishop();
 
     // methods
     PieceType getPieceType() override;

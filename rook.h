@@ -1,17 +1,17 @@
-#ifndef __PAWN_H__
-#define __PAWN_H__
+#ifndef __ROOK_H__
+#define __ROOK_H__
 
 #include "enums.h"
 #include "piece.h"
 #include <vector>
 
-class Pawn : public Piece
+class Rook : public Piece
 {
 
   public:
     // ctor/dtor
-    Pawn(Coord pos, Colour colour);
-    ~Pawn();
+    Rook(Coord pos, Colour colour);
+    ~Rook();
 
     // methods
     PieceType getPieceType() override;
