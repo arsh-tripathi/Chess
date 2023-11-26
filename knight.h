@@ -3,6 +3,7 @@
 
 #include "enums.h"
 #include "piece.h"
+#include <vector>
 
 class Knight : public Piece
 {
@@ -14,7 +15,7 @@ class Knight : public Piece
 
     // methods
     PieceType getPieceType() override;
-    vector<Coord> possibleMoves() override;
+    std::vector<Coord> possibleMoves() override;
     bool isMovePossible(Coord &c) override;
 };
 

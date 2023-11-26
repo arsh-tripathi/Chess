@@ -1,27 +1,27 @@
-#include "knight.h"
+#include "king.h"
 #include "enums.h"
 #include "piece.h"
 #include <vector>
 
 using namespace std;
 
-static const vector<Coord> ALLMOVES{Coord{2, 1},  Coord{2, -1},  Coord{1, 2},   Coord{1, -2},
-                                    Coord{-1, 2}, Coord{-1, -2}, Coord{-2, -1}, Coord{-2, 1}};
+static const vector<Coord> ALLMOVES{Coord{1, 1},  Coord{1, -1},  Coord{1, 1},   Coord{1, -1},
+                                    Coord{-1, 1}, Coord{-1, -1}, Coord{-1, -1}, Coord{-1, 1}};
 
-Knight::Knight(Coord pos, Colour colour) : Piece{pos, colour}
+King::King(Coord pos, Colour colour) : Piece{pos, colour}
 {
 }
 
-Knight::~Knight()
+King::~King()
 {
 }
 
-PieceType Knight::getPieceType()
+PieceType King::getPieceType()
 {
-    return PieceType::Knight;
+    return PieceType::King;
 }
 
-vector<Coord> Knight::possibleMoves()
+vector<Coord> King::possibleMoves()
 {
     vector<Coord> moves;
     for (int i = 0; i < ALLMOVES.size(); ++i)
@@ -35,7 +35,7 @@ vector<Coord> Knight::possibleMoves()
     return moves;
 }
 
-bool Knight::isMovePossible(Coord &c)
+bool King::isMovePossible(Coord &c)
 {
     if (!c.checkBounds())
     {
