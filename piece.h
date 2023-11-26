@@ -13,18 +13,20 @@ class Piece
   protected:
     Coord pos;
     Colour colour;
-    bool moved;
+    int moveCounter;
 
   public:
     // ctor/dtor
-    Piece(Coord pos, Colour colour) : pos{pos}, colour{colour}, moved{false}
+    Piece(Coord pos, Colour colour) : pos{pos}, colour{colour}, moveCounter{0}
     {
     }
     virtual ~Piece() = default;
 
-    bool &hasMoved()
+    int getMoveCounter() { return moveCounter;}
+
+    int incrementMoveCounter()
     {
-        return moved;
+        return ++moveCounter;
     }
     // methods
     virtual PieceType getPieceType() = 0;
