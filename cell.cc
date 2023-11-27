@@ -19,7 +19,7 @@ Cell::~Cell()
 // I don't think we need copy/move ctor or assignment operator
 
 // switches the pieces
-void Cell::move(Cell &dest)
+void Cell::move(Cell &dest, bool updateDisplay)
 {
     // when is move is confirmed valid by board, calls cell->move()
 
@@ -28,7 +28,7 @@ void Cell::move(Cell &dest)
 
     // check if capture (if capture we must delete piece at that point)
     // no need to check for allied piece since this is already checked in board.move()
-    notifyDisplayObservers(dest); // updates display
+    if (updateDisplay) notifyDisplayObservers(dest); // updates display
 }
 
 // tells display observers that piece has been moved

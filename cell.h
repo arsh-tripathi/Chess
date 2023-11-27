@@ -25,7 +25,7 @@ class Cell : public Observer
     // I don't think we need copy/move ctor or assignment operator
 
     // switches the pieces
-    void move(Cell &dest);
+    void move(Cell &dest, bool updateDisplay = false);
 
     // tells display observers that piece has been moved
     void notifyDisplayObservers(Cell &dest);
@@ -48,7 +48,7 @@ class Cell : public Observer
         return coordinate;
     }
 
-    Piece *getPiece()
+    std::unique_ptr<Piece>& getPiece()
     {
         return p;
     }

@@ -35,6 +35,10 @@ class Piece
     virtual PieceType getPieceType() = 0;
     virtual vector<vector<Coord>> possibleMoves() = 0; // checks for out of bounds
     virtual bool isMovePossible(Coord &finalPos) = 0;  // return false if out of bounds
+
+    // getters
+    Colour getColour() { return colour;}
+    Coord getPos() {return pos;}
 };
 
 #endif
