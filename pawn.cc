@@ -5,9 +5,9 @@
 
 using namespace std;
 
-static const vector<Coord> FIRSTMOVE{Coord{0, 1}, Coord{0, 2}, Coord{1, 1}, Coord{-1, 1}};
-static const vector<Coord> FURTHERMOVES{Coord{1, 0}, Coord{1, 1}, Coord{1, -1}};
-static const vector<Coord> &ALLMOVES;
+static vector<Coord> FIRSTMOVE{Coord{0, 1}, Coord{0, 2}, Coord{1, 1}, Coord{-1, 1}};
+static vector<Coord> FURTHERMOVES{Coord{1, 0}, Coord{1, 1}, Coord{1, -1}};
+static vector<Coord> &ALLMOVES = FIRSTMOVE;
 
 Pawn::Pawn(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -33,7 +33,7 @@ vector<Coord> Pawn::possibleMoves()
         ALLMOVES = FURTHERMOVES;
     }
     vector<Coord> moves;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
         Coord c = pos + ALLMOVES[i];
         if (c.checkBounds())
@@ -60,7 +60,7 @@ bool Pawn::isMovePossible(Coord &c)
         return false;
     }
     Coord difference = pos - c;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
         if (difference == ALLMOVES[i])
         {
