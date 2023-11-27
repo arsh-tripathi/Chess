@@ -1,12 +1,14 @@
 #include "knight.h"
+#include "coord.h"
 #include "enums.h"
 #include "piece.h"
 #include <vector>
 
 using namespace std;
 
-static const vector<Coord> ALLMOVES{Coord{2, 1},  Coord{2, -1},  Coord{1, 2},   Coord{1, -2},
-                                    Coord{-1, 2}, Coord{-1, -2}, Coord{-2, -1}, Coord{-2, 1}};
+static const vector<vector<Coord>> ALLMOVES{{{1, 2}}, {{2, 1}}, {{2, -1}}, {{1, -2}},
+                                            {{-1, -2}}, {{-2, -1}}, {{-2, 1}}, {{-1, 2}}};
+// vector<Coord> ALLMOVES;
 
 Knight::Knight(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -21,16 +23,21 @@ PieceType Knight::getPieceType()
     return PieceType::Knight;
 }
 
-vector<Coord> Knight::possibleMoves()
+vector<vector<Coord>> Knight::possibleMoves()
 {
-    vector<Coord> moves;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    vector<vector<Coord>> moves;
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        Coord c = pos + ALLMOVES[i];
-        if (c.checkBounds())
+        vector<Coord> tmp;
+        for (size_t j = 0; j < ALLMOVES[i].size(); ++j)
         {
-            moves.emplace_back(c);
+            Coord c = pos + ALLMOVES[i][j];
+            if (c.checkBounds())
+            {
+                tmp.emplace_back(c);
+            }
         }
+        moves.emplace_back(tmp);
     }
     return moves;
 }
@@ -42,12 +49,15 @@ bool Knight::isMovePossible(Coord &c)
         // final destination is out of bouinds
         return false;
     }
-    Coord difference = pos - c;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    Coord d = pos - c;
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        if (difference == ALLMOVES[i])
+        for (size_t j = 0; j < ALLMOVES[i].size(); ++j)
         {
-            return true;
+            if (d == ALLMOVES[i][j])
+            {
+                return true;
+            }
         }
     }
     return false;

@@ -8,9 +8,9 @@ class Coord
 
   public:
     Coord(int x, int y);
-    Coord(Coord &other);
+    Coord(const Coord &other);
     Coord(Coord &&other);
-    Coord &operator=(Coord &other);
+    Coord &operator=(const Coord &other);
     Coord &operator=(Coord &&other);
     ~Coord();
 
@@ -19,9 +19,9 @@ class Coord
 
     bool checkBounds() const;
     bool operator==(const Coord &other) const;
-    Coord &operator+(const Coord &other);
-    Coord &operator-(const Coord &other);
-    Coord &operator*(int scale);
+    Coord operator+(const Coord &other);
+    Coord operator-(const Coord &other);
+    Coord operator*(int scale);
 };
 
 #endif
