@@ -12,7 +12,10 @@ using namespace std;
 class Cell: public Observer {
 
     Coord coordinate;
-    vector<Observer*> observers;
+    
+    // definetly going to be shared pointers
+    vector<Observer*> observers; // textDisplay, graphicsDisplay and all possibleMoves Cells
+    
     Piece* p;
 
     public:
@@ -40,6 +43,16 @@ class Cell: public Observer {
 
     // when piece is moved away from cell, we detach all cell observers
     void detachAllCellObservers();
+
+    // getters
+
+    Coord getCoordinate() {
+        return coordinate;
+    }
+
+    Piece* getPiece() {
+        return p;
+    }
 
 };
 

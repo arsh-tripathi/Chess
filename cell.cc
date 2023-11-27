@@ -13,9 +13,6 @@ void Cell::move(Cell& c) {
 
     // check if capture (if capture we must delete piece at that point)
     // no need to check for allied piece since this is already checked in board.move()
-    if () {
-
-    }
 
 }
 
