@@ -7,9 +7,6 @@
 
 class Rook : public Piece
 {
-
-  bool hasMoved;
-
   public:
     // ctor/dtor
     Rook(Coord pos, Colour colour);

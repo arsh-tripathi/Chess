@@ -10,7 +10,6 @@ static const vector<Coord> FIRSTMOVES{Coord{1, 1},  Coord{1, -1},  Coord{1, 0}, 
                                       Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}, Coord{2, 0},  Coord{-2, 0}};
 static const vector<Coord> FURTHERMOVES{Coord{1, 1}, Coord{1, -1}, Coord{1, 0},   Coord{0, -1},
                                         Coord{0, 1}, Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}};
-static vector<Coord> ALLMOVES; // compiler very angry if const reference -> we use copy ctor of coord instead
 
 King::King(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -27,53 +26,61 @@ PieceType King::getPieceType()
 
 vector<Coord> King::possibleMoves()
 {
+    Coord c{0, 0};
     if (!moveCounter)
     {
-        ALLMOVES = FIRSTMOVES;
-    }
-    else
-    {
-        ALLMOVES = FURTHERMOVES;
+        vector<Coord> moves;
+        for (size_t i = 0; i < FIRSTMOVES.size(); ++i)
+        {
+            c = pos + FIRSTMOVES[i]; // + modifies pos directly
+                                     // in implementation
+            if (c.checkBounds())
+            {
+                moves.emplace_back(c);
+            }
+        }
+        return moves;
     }
     vector<Coord> moves;
-    for (size_t i = 0; i < ALLMOVES.size(); ++i)
+    for (size_t i = 0; i < FIRSTMOVES.size(); ++i)
     {
-        pos + ALLMOVES[i]; // + modifies pos directly
-                           // in implementation
-        if (pos.checkBounds())
+        c = pos + FURTHERMOVES[i]; // + modifies pos directly
+                                   // in implementation
+        if (c.checkBounds())
         {
-            moves.emplace_back(pos);
+            moves.emplace_back(c);
         }
-        pos - ALLMOVES[i]; // return pos to original
-                           // after check
     }
     return moves;
 }
 
 bool King::isMovePossible(Coord &c)
 {
-    if (!moveCounter)
-    {
-        ALLMOVES = FIRSTMOVES;
-    }
-    else
-    {
-        ALLMOVES = FURTHERMOVES;
-    }
     if (!c.checkBounds())
     {
         // final destination is out of bouinds
         return false;
     }
-    pos - c;
-    for (size_t i = 0; i < ALLMOVES.size(); ++i)
+    Coord d{0, 0};
+    if (!moveCounter)
     {
-        if (pos == ALLMOVES[i])
+        d = pos - c;
+        for (size_t i = 0; i < FIRSTMOVES.size(); ++i)
         {
-            pos + c;
+            if (d == FIRSTMOVES[i])
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    d = pos - c;
+    for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
+    {
+        if (d == FURTHERMOVES[i])
+        {
             return true;
         }
     }
-    pos + c; // return pos to original
     return false;
 }

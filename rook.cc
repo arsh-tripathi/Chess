@@ -11,7 +11,7 @@ static const vector<Coord> ALLMOVES{Coord{1, 0},  Coord{2, 0},  Coord{3, 0},  Co
                                     Coord{0, 5},  Coord{0, 6},  Coord{-0, 7}, Coord{-1, 0}, Coord{-2, 0}, Coord{-3, 0},
                                     Coord{-4, 0}, Coord{-5, 0}, Coord{-6, 0}, Coord{-7, 0}};
 
-Rook::Rook(Coord pos, Colour colour) : Piece{pos, colour}, hasMoved{false}
+Rook::Rook(Coord pos, Colour colour) : Piece{pos, colour}
 {
 }
 
@@ -29,14 +29,12 @@ vector<Coord> Rook::possibleMoves()
     vector<Coord> moves;
     for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        pos + ALLMOVES[i]; // + modifies pos directly
-                           // in implementation
-        if (pos.checkBounds())
+        Coord c = pos + ALLMOVES[i]; // + modifies pos directly
+                                     // in implementation
+        if (c.checkBounds())
         {
-            moves.emplace_back(pos);
+            moves.emplace_back(c);
         }
-        pos - ALLMOVES[i]; // return pos to original
-                           // after check
     }
     return moves;
 }
@@ -48,15 +46,13 @@ bool Rook::isMovePossible(Coord &c)
         // final destination is out of bouinds
         return false;
     }
-    pos - c;
+    Coord d = pos - c;
     for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        if (pos == ALLMOVES[i])
+        if (d == ALLMOVES[i])
         {
-            pos + c;
             return true;
         }
     }
-    pos + c; // return pos to original
     return false;
 }

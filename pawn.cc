@@ -6,9 +6,8 @@
 using namespace std;
 
 // check over stored coordinates
-static vector<Coord> FIRSTMOVE{Coord{0, 1}, Coord{1, 1}, Coord{-1, 1},  Coord{0, 2}};
+static vector<Coord> FIRSTMOVE{Coord{0, 1}, Coord{1, 1}, Coord{-1, 1}, Coord{0, 2}};
 static vector<Coord> FURTHERMOVES{Coord{0, 1}, Coord{1, 1}, Coord{-1, 1}};
-static vector<Coord> ALLMOVES; // compiler very angry if const reference -> we use copy ctor of coord instead
 
 Pawn::Pawn(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -27,51 +26,87 @@ vector<Coord> Pawn::possibleMoves()
 {
     if (!moveCounter)
     {
-        ALLMOVES = FIRSTMOVE;
-    }
-    else
-    {
-        ALLMOVES = FURTHERMOVES;
+        vector<Coord> moves;
+        for (size_t i = 0; i < FIRSTMOVE.size(); ++i)
+        {
+            Coord c{0, 0};
+            if (colour == Colour::Black)
+            {
+                c = pos - FIRSTMOVE[i];
+            }
+            else
+            {
+                c = pos + FIRSTMOVE[i];
+            }
+            if (c.checkBounds())
+            {
+                moves.emplace_back(c);
+            }
+        }
+        return moves;
     }
     vector<Coord> moves;
-    for (size_t i = 0; i < ALLMOVES.size(); ++i)
+    for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
     {
-        pos + ALLMOVES[i]; // + modifies pos directly
-                           // in implementation
-        if (pos.checkBounds())
+        Coord c{0, 0};
+        if (colour == Colour::Black)
         {
-            moves.emplace_back(pos);
+            c = pos - FIRSTMOVE[i];
         }
-        pos - ALLMOVES[i]; // return pos to original
-                           // after check
+        else
+        {
+            c = pos + FIRSTMOVE[i];
+        }
+        if (c.checkBounds())
+        {
+            moves.emplace_back(c);
+        }
     }
     return moves;
 }
 
 bool Pawn::isMovePossible(Coord &c)
 {
-    if (!moveCounter)
-    {
-        ALLMOVES = FIRSTMOVE;
-    }
-    else
-    {
-        ALLMOVES = FURTHERMOVES;
-    }
     if (!c.checkBounds())
     {
         // final destination is out of bouinds
         return false;
     }
-    c - pos;
-    for (size_t i = 0; i < ALLMOVES.size(); ++i)
+    Coord d{0, 0};
+    if (!moveCounter)
     {
-        if (c == ALLMOVES[i])
+
+        if (colour == Colour::Black)
         {
-            c + pos;
+            d = pos - c;
+        }
+        else
+        {
+            d = c - pos;
+        }
+        for (size_t i = 0; i < FIRSTMOVE.size(); ++i)
+        {
+            if (d == FIRSTMOVE[i])
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    if (colour == Colour::Black)
+    {
+        d = pos - c;
+    }
+    else
+    {
+        d = c - pos;
+    }
+    for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
+    {
+        if (d == FURTHERMOVES[i])
+        {
             return true;
         }
     }
-    c + pos; // return pos to original
     return false;
 }

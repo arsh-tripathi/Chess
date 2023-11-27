@@ -54,23 +54,26 @@ bool Coord::operator==(const Coord &other) const
     return (X == other.X) && (Y == other.Y);
 }
 
-Coord &Coord::operator+(const Coord &other)
+Coord Coord::operator+(const Coord &other)
 {
-    X += other.X;
-    Y += other.Y;
-    return *this;
+    Coord c{*this};
+    c.X += other.X;
+    c.Y += other.Y;
+    return c;
 }
 
-Coord &Coord::operator-(const Coord &other)
+Coord Coord::operator-(const Coord &other)
 {
-    X -= other.X;
-    Y -= other.Y;
-    return *this;
+    Coord c{*this};
+    c.X -= other.X;
+    c.Y -= other.Y;
+    return c;
 }
 
-Coord &Coord::operator*(int scale)
+Coord Coord::operator*(int scale)
 {
-    X *= scale;
-    Y *= scale;
-    return *this;
+    Coord c{*this};
+    c.X *= scale;
+    c.Y *= scale;
+    return c;
 }
