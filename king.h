@@ -15,12 +15,13 @@ class King : public Piece
 
     // methods
     PieceType getPieceType() override;
-    std::vector<Coord> possibleMoves() override;
+    std::vector<std::vector<Coord>> possibleMoves() override;
     bool isMovePossible(Coord &c) override;
 
     // for testing of pieces
-    void setMoveCounter(int moves) {
-      moveCounter = moves;
+    void setMoveCounter(int moves)
+    {
+        moveCounter = moves;
     }
 };
 

@@ -7,6 +7,7 @@
 
 class Rook : public Piece
 {
+
   public:
     // ctor/dtor
     Rook(Coord pos, Colour colour);
@@ -14,7 +15,7 @@ class Rook : public Piece
 
     // methods
     PieceType getPieceType() override;
-    std::vector<Coord> possibleMoves() override;
+    std::vector<std::vector<Coord>> possibleMoves() override;
     bool isMovePossible(Coord &c) override;
 };
 

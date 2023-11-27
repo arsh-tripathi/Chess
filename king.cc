@@ -6,10 +6,10 @@
 
 using namespace std;
 
-static const vector<Coord> FIRSTMOVES{Coord{1, 1},  Coord{1, -1},  Coord{1, 0},  Coord{0, -1}, Coord{0, 1},
-                                      Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}, Coord{2, 0},  Coord{-2, 0}};
-static const vector<Coord> FURTHERMOVES{Coord{1, 1}, Coord{1, -1}, Coord{1, 0},   Coord{0, -1},
-                                        Coord{0, 1}, Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}};
+static const vector<Coord> FIRSTMOVES{{{0, 1}},  {{1, 1}},   {{1, 0}},  {{2, 0}},  {{1, -1}},
+                                      {{0, -1}}, {{-1, -1}}, {{-2, 0}}, {{-1, 0}}, {{-1, 1}}};
+static const vector<Coord> FURTHERMOVES{{{0, 1}},  {{1, 1}},   {{1, 0}},  {{1, -1}},
+                                        {{0, -1}}, {{-1, -1}}, {{-1, 0}}, {{-1, 1}}};
 
 King::King(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -24,32 +24,41 @@ PieceType King::getPieceType()
     return PieceType::King;
 }
 
-vector<Coord> King::possibleMoves()
+vector<vector<Coord>> King::possibleMoves()
 {
     Coord c{0, 0};
+    vector<vector<Coord>> moves;
     if (!moveCounter)
     {
-        vector<Coord> moves;
         for (size_t i = 0; i < FIRSTMOVES.size(); ++i)
         {
-            c = pos + FIRSTMOVES[i]; // + modifies pos directly
-                                     // in implementation
-            if (c.checkBounds())
+            vector<Coord> tmp;
+            for (size_t j = 0; j < FIRSTMOVES[i].size(); ++j)
             {
-                moves.emplace_back(c);
+                c = pos + FIRSTMOVES[i][j]; // + modifies pos directly
+                                            // in implementation
+                if (c.checkBounds())
+                {
+                    tmp.emplace_back(c);
+                }
             }
+            moves.emplace_back(tmp);
         }
         return moves;
     }
-    vector<Coord> moves;
-    for (size_t i = 0; i < FIRSTMOVES.size(); ++i)
+    for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
     {
-        c = pos + FURTHERMOVES[i]; // + modifies pos directly
-                                   // in implementation
-        if (c.checkBounds())
+        vector<Coord> tmp;
+        for (size_t j = 0; j < FURTHERMOVES[i].size(); ++j)
         {
-            moves.emplace_back(c);
+            c = pos + FURTHERMOVES[i][j]; // + modifies pos directly
+                                          // in implementation
+            if (c.checkBounds())
+            {
+                tmp.emplace_back(c);
+            }
         }
+        moves.emplace_back(tmp);
     }
     return moves;
 }
@@ -67,9 +76,12 @@ bool King::isMovePossible(Coord &c)
         d = pos - c;
         for (size_t i = 0; i < FIRSTMOVES.size(); ++i)
         {
-            if (d == FIRSTMOVES[i])
+            for (size_t j = 0; j < FIRSTMOVES[i].size(); ++j)
             {
-                return true;
+                if (d == FIRSTMOVES[i][j])
+                {
+                    return true;
+                }
             }
         }
         return false;
@@ -77,7 +89,7 @@ bool King::isMovePossible(Coord &c)
     d = pos - c;
     for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
     {
-        if (d == FURTHERMOVES[i])
+        for (size_t j = 0; j < FURTHERMOVES[i].size(); ++j)
         {
             return true;
         }

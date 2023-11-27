@@ -6,8 +6,8 @@
 
 using namespace std;
 
-static const vector<Coord> ALLMOVES{Coord{2, 1},  Coord{2, -1},  Coord{1, 2},   Coord{1, -2},
-                                    Coord{-1, 2}, Coord{-1, -2}, Coord{-2, -1}, Coord{-2, 1}};
+static const vector<vector<Coord>> ALLMOVES{{{1, 2}},   {{2, 1}},   {{2, -1}}, {{1, -2}},
+                                            {{-1, -2}}, {{-2, -1}}, {{-2, 1}}, {{-1, 2}}};
 // vector<Coord> ALLMOVES;
 
 Knight::Knight(Coord pos, Colour colour) : Piece{pos, colour}
@@ -23,17 +23,21 @@ PieceType Knight::getPieceType()
     return PieceType::Knight;
 }
 
-vector<Coord> Knight::possibleMoves()
+vector<vector<Coord>> Knight::possibleMoves()
 {
-    vector<Coord> moves;
+    vector<vector<Coord>> moves;
     for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        Coord c = pos + ALLMOVES[i]; // + modifies pos directly
-                                     // in implementation
-        if (c.checkBounds())
+        vector<Coord> tmp;
+        for (size_t j = 0; j < ALLMOVES[i].size(); ++j)
         {
-            moves.emplace_back(c);
+            Coord c = pos + ALLMOVES[i][j];
+            if (c.checkBounds())
+            {
+                tmp.emplace_back(c);
+            }
         }
+        moves.emplace_back(tmp);
     }
     return moves;
 }
@@ -48,9 +52,12 @@ bool Knight::isMovePossible(Coord &c)
     Coord d = pos - c;
     for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        if (d == ALLMOVES[i])
+        for (size_t j = 0; j < ALLMOVES[i].size(); ++j)
         {
-            return true;
+            if (d == ALLMOVES[i][j])
+            {
+                return true;
+            }
         }
     }
     return false;

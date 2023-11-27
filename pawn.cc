@@ -1,4 +1,5 @@
 #include "pawn.h"
+#include "coord.h"
 #include "enums.h"
 #include "piece.h"
 #include <vector>
@@ -6,8 +7,8 @@
 using namespace std;
 
 // check over stored coordinates
-static vector<Coord> FIRSTMOVE{Coord{0, 1}, Coord{1, 1}, Coord{-1, 1}, Coord{0, 2}};
-static vector<Coord> FURTHERMOVES{Coord{0, 1}, Coord{1, 1}, Coord{-1, 1}};
+static const vector<vector<Coord>> FIRSTMOVE{{{0, 1}}, {{1, 1}}, {{-1, 1}}, {{0, 2}}};
+static const vector<vector<Coord>> FURTHERMOVES{{{0, 1}}, {{1, 1}}, {{-1, 1}}};
 
 Pawn::Pawn(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -22,45 +23,54 @@ PieceType Pawn::getPieceType()
     return PieceType::Pawn;
 }
 
-vector<Coord> Pawn::possibleMoves()
+vector<vector<Coord>> Pawn::possibleMoves()
 {
+    vector<vector<Coord>> moves;
     if (!moveCounter)
     {
-        vector<Coord> moves;
         for (size_t i = 0; i < FIRSTMOVE.size(); ++i)
+        {
+            vector<Coord> tmp;
+            for (size_t j = 0; j < FIRSTMOVE[i].size(); ++j)
+            {
+                Coord c{0, 0};
+                if (colour == Colour::Black)
+                {
+                    c = pos - FIRSTMOVE[i][j];
+                }
+                else
+                {
+                    c = pos + FIRSTMOVE[i][j];
+                }
+                if (c.checkBounds())
+                {
+                    tmp.emplace_back(c);
+                }
+            }
+            moves.emplace_back(tmp);
+        }
+        return moves;
+    }
+    for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
+    {
+        vector<Coord> tmp;
+        for (size_t j = 0; j < FURTHERMOVES[i].size(); ++j)
         {
             Coord c{0, 0};
             if (colour == Colour::Black)
             {
-                c = pos - FIRSTMOVE[i];
+                c = pos - FIRSTMOVE[i][j];
             }
             else
             {
-                c = pos + FIRSTMOVE[i];
+                c = pos + FIRSTMOVE[i][j];
             }
             if (c.checkBounds())
             {
-                moves.emplace_back(c);
+                tmp.emplace_back(c);
             }
         }
-        return moves;
-    }
-    vector<Coord> moves;
-    for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
-    {
-        Coord c{0, 0};
-        if (colour == Colour::Black)
-        {
-            c = pos - FIRSTMOVE[i];
-        }
-        else
-        {
-            c = pos + FIRSTMOVE[i];
-        }
-        if (c.checkBounds())
-        {
-            moves.emplace_back(c);
-        }
+        moves.emplace_back(tmp);
     }
     return moves;
 }
@@ -86,9 +96,12 @@ bool Pawn::isMovePossible(Coord &c)
         }
         for (size_t i = 0; i < FIRSTMOVE.size(); ++i)
         {
-            if (d == FIRSTMOVE[i])
+            for (size_t j = 0; j < FIRSTMOVE[i].size(); ++j)
             {
-                return true;
+                if (d == FIRSTMOVE[i][j])
+                {
+                    return true;
+                }
             }
         }
         return false;
@@ -103,9 +116,12 @@ bool Pawn::isMovePossible(Coord &c)
     }
     for (size_t i = 0; i < FURTHERMOVES.size(); ++i)
     {
-        if (d == FURTHERMOVES[i])
+        for (size_t j = 0; j < FURTHERMOVES[i].size(); ++j)
         {
-            return true;
+            if (d == FURTHERMOVES[i][j])
+            {
+                return true;
+            }
         }
     }
     return false;

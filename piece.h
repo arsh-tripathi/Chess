@@ -22,7 +22,10 @@ class Piece
     }
     virtual ~Piece() = default;
 
-    int getMoveCounter() { return moveCounter;}
+    int getMoveCounter()
+    {
+        return moveCounter;
+    }
 
     int incrementMoveCounter()
     {
@@ -30,8 +33,8 @@ class Piece
     }
     // methods
     virtual PieceType getPieceType() = 0;
-    virtual vector<Coord> possibleMoves() = 0;        // checks for out of bounds
-    virtual bool isMovePossible(Coord &finalPos) = 0; // return false if out of bounds
+    virtual vector<vector<Coord>> possibleMoves() = 0; // checks for out of bounds
+    virtual bool isMovePossible(Coord &finalPos) = 0;  // return false if out of bounds
 };
 
 #endif

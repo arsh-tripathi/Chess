@@ -1,15 +1,16 @@
 #include "bishop.h"
+#include "coord.h"
 #include "enums.h"
 #include "piece.h"
 #include <vector>
 
 using namespace std;
 
-static const vector<Coord> ALLMOVES{
-    Coord{1, 1},   Coord{2, 2},   Coord{3, 3},   Coord{4, 4},   Coord{5, 5},   Coord{6, 6},   Coord{7, 7},
-    Coord{1, -1},  Coord{2, -2},  Coord{3, -3},  Coord{4, -4},  Coord{5, -5},  Coord{6, -6},  Coord{7, -7},
-    Coord{-1, 1},  Coord{-2, 2},  Coord{-3, 3},  Coord{-4, 4},  Coord{-5, 5},  Coord{-6, 6},  Coord{-7, 7},
-    Coord{-1, -1}, Coord{-2, -2}, Coord{-3, -3}, Coord{-4, -4}, Coord{-5, -5}, Coord{-6, -6}, Coord{-7, -7}};
+static const vector<vector<Coord>> ALLMOVES{{{1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7}},
+                                            {{1, -1}, {2, -2}, {3, -3}, {4, -4}, {5, -5}, {6, -6}, {7, -7}},
+                                            {{-1, -1}, {-2, -2}, {-3, -3}, {-4, -4}, {-5, -5}, {-6, -6}, {-7, -7}},
+                                            {{-1, 1}, {-2, 2}, {-3, 3}, {-4, 4}, {-5, 5}, {-6, 6}, {-7, 7}}};
+// vector<Coord> ALLMOVES;
 
 Bishop::Bishop(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -24,17 +25,21 @@ PieceType Bishop::getPieceType()
     return PieceType::Bishop;
 }
 
-vector<Coord> Bishop::possibleMoves()
+vector<vector<Coord>> Bishop::possibleMoves()
 {
-    vector<Coord> moves;
+    vector<vector<Coord>> moves;
     for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        Coord c = pos + ALLMOVES[i]; // + modifies pos directly
-                                     // in implementation
-        if (c.checkBounds())
+        vector<Coord> tmp;
+        for (size_t j = 0; j < ALLMOVES[i].size(); ++j)
         {
-            moves.emplace_back(c);
+            Coord c = pos + ALLMOVES[i][j];
+            if (c.checkBounds())
+            {
+                tmp.emplace_back(c);
+            }
         }
+        moves.emplace_back(tmp);
     }
     return moves;
 }
@@ -49,9 +54,12 @@ bool Bishop::isMovePossible(Coord &c)
     Coord d = pos - c;
     for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        if (d == ALLMOVES[i])
+        for (size_t j = 0; j < ALLMOVES[i].size(); ++j)
         {
-            return true;
+            if (d == ALLMOVES[i][j])
+            {
+                return true;
+            }
         }
     }
     return false;
