@@ -247,7 +247,7 @@ int main () {
             Coord possibleC{x2, y2}; // coord of possible destination
             
             cin >> numMoves;
-
+           
             // create piece show possible moves
             Pawn myP{myC, Colour::Black};
             myP.setMoveCounter(numMoves);

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-static const vector<vector<Coord>> ALLMOVES{{{1, 2}},   {{2, 1}},   {{2, -1}}, {{1, -2}},
+static const vector<vector<Coord>> ALLMOVES{{{1, 2}}, {{2, 1}}, {{2, -1}}, {{1, -2}},
                                             {{-1, -2}}, {{-2, -1}}, {{-2, 1}}, {{-1, 2}}};
 // vector<Coord> ALLMOVES;
 

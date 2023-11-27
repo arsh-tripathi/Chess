@@ -6,10 +6,10 @@
 
 using namespace std;
 
-static const vector<Coord> FIRSTMOVES{{{0, 1}},  {{1, 1}},   {{1, 0}},  {{2, 0}},  {{1, -1}},
-                                      {{0, -1}}, {{-1, -1}}, {{-2, 0}}, {{-1, 0}}, {{-1, 1}}};
-static const vector<Coord> FURTHERMOVES{{{0, 1}},  {{1, 1}},   {{1, 0}},  {{1, -1}},
-                                        {{0, -1}}, {{-1, -1}}, {{-1, 0}}, {{-1, 1}}};
+static const vector<vector<Coord>> FIRSTMOVES{{{0, 1}}, {{1, 1}}, {{1, 0}}, {{2, 0}}, {{1, -1}},
+                                                {{0, -1}}, {{-1, -1}}, {{-2, 0}}, {{-1, 0}}, {{-1, 1}}};
+static const vector<vector<Coord>> FURTHERMOVES{{{0, 1}}, {{1, 1}}, {{1, 0}}, {{1, -1}},
+                                                {{0, -1}}, {{-1, -1}}, {{-1, 0}}, {{-1, 1}}};
 
 King::King(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -91,7 +91,10 @@ bool King::isMovePossible(Coord &c)
     {
         for (size_t j = 0; j < FURTHERMOVES[i].size(); ++j)
         {
-            return true;
+            if (d == FURTHERMOVES[i][j])
+            {
+                return true;
+            }
         }
     }
     return false;
