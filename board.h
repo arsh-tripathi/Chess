@@ -57,12 +57,16 @@ class Board {
     void placePiece(Colour colour, Coord coord, PieceType pt);
     bool isWhiteTurn();
 
-    // **** Set undoInfo after making a move
-    // **** should increment moveCounter
-    bool move(Coord curr, Coord dest) {
+    bool isPossibleMove(Coord curr, Coord dest) {
+        Colour currPlayerColour = Colour::Black;
+        if (isWhiteTurn()) {
+            currPlayerColour = Colour::White;    
+        }
         // make sure that there exists a piece at curr
         if (theBoard[curr.x()][curr.y()]->getPiece() == nullptr) return false;
 
+        // check if it is the players piece
+        if (theBoard[curr.x()][curr.y()]->getPiece()->getColour() != currPlayerColour) return false;
         // maybe check for checks?
 
         // checks move orientation based on piece and dest is in bounds of boards
@@ -73,11 +77,61 @@ class Board {
         else if (theBoard[curr.x()][curr.y()]->getPiece()->getColour() == theBoard[dest.x()][dest.y()]->getPiece()->getColour()) return false;
 
         // check for obstacle
+        if(!singlePathBlockCheck(curr, dest)) return false;
+        return true;      
+    }
+
+    // **** should increment moveCounter
+    // **** CASTLE
+    // **** EN PASSENT
+    bool move(Coord curr, Coord dest) {
         
+        if (!isPossibleMove(curr, dest)) return false;
 
-        // make the move and check invalid state
+        // make the move
+        theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()]);
+        isWhiteMove = !isWhiteMove;
+        
+        //***************************** if move is king, we have to fuck everything up fuck WORRY ABOUT LATER!!!!
+        if (theBoard[dest.x()][dest.y()]->getPiece()->getPieceType() == PieceType::King) {
+            
+        }
 
-    }  
+        updateState();
+        
+        // check the state
+        if (status == State::Invalid) {
+            undo();
+            return false;
+        }
+
+        return true;
+
+    }
+    private:
+    shared_ptr<Cell> whiteKing;
+    shared_ptr<Cell> blackKing;
+    
+    vector<shared_ptr<Cell>> piecesAttackingWhiteKing;
+    vector<shared_ptr<Cell>> piecesAttackingBlackKing;
+    void updateState() {
+        if (isWhiteMove) {
+            // go through piecesAttackingBlackKing
+            for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
+                if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate())) {
+                    status = State::Invalid;
+                }
+            }
+        } else {
+            // go through piecesAttackingWhiteKing
+            for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
+                if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate())) {
+                    status = State::Invalid;
+                }
+            }
+        }
+    }
+    public:
 
     // checks if Cell is on the table and cell is not allied piece
     std::vector<std::shared_ptr<Cell>> possibleMoves(Coord curr) {
@@ -91,7 +145,7 @@ class Board {
     */
         vector<shared_ptr<Cell>> possibleMovesFromCurr;
         auto currCellPtr = theBoard[curr.x()][curr.y()];
-        vector<Coord> possibleMovesUnfiltered = currCellPtr->getPiece()->possibleMoves();
+        vector<vector<Coord>> possibleMovesUnfiltered = currCellPtr->getPiece()->possibleMoves();
     }
     
     private:
@@ -100,11 +154,16 @@ class Board {
         
     }
 
+    // returns true if the path from curr to dest is not blocked
     bool singlePathBlockCheck(Coord curr, Coord dest) {
         auto pmoves = theBoard[curr.x()][curr.y()]->getPiece()->possibleMoves();
         for (size_t r = 0; r < pmoves.size(); ++r) {
-
+            for (size_t c = 0; c < pmoves[r].size(); ++c) {
+                if (theBoard[pmoves[r][c].x()][pmoves[r][c].y()]->getCoordinate() == dest) return true;
+                else if (theBoard[pmoves[r][c].x()][pmoves[r][c].y()]->getPiece() != nullptr) break;
+            }
         }
+        return false;
     }
 
 
