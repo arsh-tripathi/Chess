@@ -10,7 +10,7 @@ static const vector<Coord> FIRSTMOVES{Coord{1, 1},  Coord{1, -1},  Coord{1, 0}, 
                                       Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}, Coord{2, 0},  Coord{-2, 0}};
 static const vector<Coord> FURTHERMOVES{Coord{1, 1}, Coord{1, -1}, Coord{1, 0},   Coord{0, -1},
                                         Coord{0, 1}, Coord{-1, 0}, Coord{-1, -1}, Coord{-1, 1}};
-static const vector<Coord> ALLMOVES & = FIRSTMOVES;
+static vector<Coord> ALLMOVES; // compiler very angry if const reference -> we use copy ctor of coord instead
 
 King::King(Coord pos, Colour colour) : Piece{pos, colour}
 {
@@ -36,13 +36,16 @@ vector<Coord> King::possibleMoves()
         ALLMOVES = FURTHERMOVES;
     }
     vector<Coord> moves;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        Coord c = pos + ALLMOVES[i];
-        if (c.checkBounds())
+        pos + ALLMOVES[i]; // + modifies pos directly
+                           // in implementation
+        if (pos.checkBounds())
         {
-            moves.emplace_back(c);
+            moves.emplace_back(pos);
         }
+        pos - ALLMOVES[i]; // return pos to original
+                           // after check
     }
     return moves;
 }
@@ -62,13 +65,15 @@ bool King::isMovePossible(Coord &c)
         // final destination is out of bouinds
         return false;
     }
-    Coord difference = pos - c;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    pos - c;
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        if (difference == ALLMOVES[i])
+        if (pos == ALLMOVES[i])
         {
+            pos + c;
             return true;
         }
     }
+    pos + c; // return pos to original
     return false;
 }

@@ -31,13 +31,16 @@ PieceType Queen::getPieceType()
 vector<Coord> Queen::possibleMoves()
 {
     vector<Coord> moves;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        Coord c = pos + ALLMOVES[i];
-        if (c.checkBounds())
+        pos + ALLMOVES[i]; // + modifies pos directly
+                           // in implementation
+        if (pos.checkBounds())
         {
-            moves.emplace_back(c);
+            moves.emplace_back(pos);
         }
+        pos - ALLMOVES[i]; // return pos to original
+                           // after check
     }
     return moves;
 }
@@ -49,13 +52,15 @@ bool Queen::isMovePossible(Coord &c)
         // final destination is out of bouinds
         return false;
     }
-    Coord difference = pos - c;
-    for (int i = 0; i < ALLMOVES.size(); ++i)
+    pos - c;
+    for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
-        if (difference == ALLMOVES[i])
+        if (pos == ALLMOVES[i])
         {
+            pos + c;
             return true;
         }
     }
+    pos + c; // return pos to original
     return false;
 }
