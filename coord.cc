@@ -4,7 +4,7 @@ Coord::Coord(int x, int y) : X{x}, Y{y}
 {
 }
 
-Coord::Coord(Coord &other) : X{other.X}, Y{other.Y}
+Coord::Coord(const Coord &other) : X{other.X}, Y{other.Y}
 {
 }
 
@@ -12,7 +12,7 @@ Coord::Coord(Coord &&other) : X{other.X}, Y{other.Y}
 {
 }
 
-Coord &Coord::operator=(Coord &other)
+Coord &Coord::operator=(const Coord &other)
 {
     if (this == &other)
     {

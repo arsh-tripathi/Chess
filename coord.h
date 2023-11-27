@@ -8,9 +8,9 @@ class Coord
 
   public:
     Coord(int x, int y);
-    Coord(Coord &other);
+    Coord(const Coord &other);
     Coord(Coord &&other);
-    Coord &operator=(Coord &other);
+    Coord &operator=(const Coord &other);
     Coord &operator=(Coord &&other);
     ~Coord();
 
