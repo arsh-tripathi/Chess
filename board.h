@@ -118,12 +118,86 @@ class Board {
     // sets up default chess board by calling placePiece(...)
     void setupDefaultBoard() {
         // setup white pawns
-        
+        for (int i = 0; i < boardSize; ++i) {
+            unique_ptr<Piece> pawn = make_unique<Pawn>(Coord{i, 1}, Colour::White);
+            theBoard[i][1]->setPiece(pawn.get()); 
+            whitePieces.emplace_back(std::move(pawn));
+        }
         // setup white pieces
+        // Rooks
+        unique_ptr<Piece> wrook1 = make_unique<Rook>(Coord{0, 0}, Colour::White);
+        theBoard[0][0]->setPiece(wrook1.get()); 
+        whitePieces.emplace_back(std::move(wrook1));
+        unique_ptr<Piece> wrook2 = make_unique<Rook>(Coord{7, 0}, Colour::White);
+        theBoard[7][0]->setPiece(wrook2.get()); 
+        whitePieces.emplace_back(std::move(wrook2));
+        // Knights
+        unique_ptr<Piece> wknight1 = make_unique<Knight>(Coord{1, 0}, Colour::White);
+        theBoard[1][0]->setPiece(wknight1.get()); 
+        whitePieces.emplace_back(std::move(wknight1));
+        unique_ptr<Piece> wknight2 = make_unique<Knight>(Coord{6, 0}, Colour::White);
+        theBoard[6][0]->setPiece(wknight2.get()); 
+        whitePieces.emplace_back(std::move(wknight2));
+        // Bishops
+        unique_ptr<Piece> wbishop1 = make_unique<Bishop>(Coord{2, 0}, Colour::White);
+        theBoard[2][0]->setPiece(wbishop1.get()); 
+        whitePieces.emplace_back(std::move(wbishop1));
+        unique_ptr<Piece> wbishop2 = make_unique<Bishop>(Coord{5, 0}, Colour::White);
+        theBoard[5][0]->setPiece(wbishop2.get()); 
+        whitePieces.emplace_back(std::move(wbishop2));
+        // Queen
+        unique_ptr<Piece> wqueen = make_unique<Queen>(Coord{3, 0}, Colour::White);
+        theBoard[3][0]->setPiece(wqueen.get()); 
+        whitePieces.emplace_back(std::move(wqueen));
+        // King
+        unique_ptr<Piece> wking = make_unique<King>(Coord{4, 0}, Colour::White);
+        theBoard[4][0]->setPiece(wking.get()); 
+        whitePieces.emplace_back(std::move(wking));
+
+        // Add White King to field whiteKing
+        whiteKing = theBoard[4][0];
+
+        // ====================================================
 
         // setup black pawns
-
+        for (int i = 0; i < boardSize; ++i) {
+            unique_ptr<Piece> pawn = make_unique<Pawn>(Coord{i, 6}, Colour::Black);
+            theBoard[i][6]->setPiece(pawn.get()); 
+            blackPieces.emplace_back(std::move(pawn));
+        }
         // setup black pieces
+        // Rooks
+        unique_ptr<Piece> brook1 = make_unique<Rook>(Coord{0, 7}, Colour::Black);
+        theBoard[0][7]->setPiece(brook1.get()); 
+        blackPieces.emplace_back(std::move(brook1));
+        unique_ptr<Piece> brook2 = make_unique<Rook>(Coord{7, 7}, Colour::Black);
+        theBoard[7][7]->setPiece(brook2.get()); 
+        blackPieces.emplace_back(std::move(brook2));
+        // Knights
+        unique_ptr<Piece> bknight1 = make_unique<Knight>(Coord{1, 7}, Colour::Black);
+        theBoard[1][7]->setPiece(bknight1.get()); 
+        blackPieces.emplace_back(std::move(bknight1));
+        unique_ptr<Piece> bknight2 = make_unique<Knight>(Coord{6, 7}, Colour::Black);
+        theBoard[6][7]->setPiece(bknight2.get()); 
+        blackPieces.emplace_back(std::move(bknight2));
+        // Bishops
+        unique_ptr<Piece> bbishop1 = make_unique<Bishop>(Coord{2, 7}, Colour::Black);
+        theBoard[2][7]->setPiece(bbishop1.get()); 
+        blackPieces.emplace_back(std::move(bbishop1));
+        unique_ptr<Piece> bbishop2 = make_unique<Bishop>(Coord{5, 7}, Colour::Black);
+        theBoard[5][7]->setPiece(bbishop2.get()); 
+        blackPieces.emplace_back(std::move(bbishop2));
+        // Queen
+        unique_ptr<Piece> bqueen = make_unique<Queen>(Coord{3, 7}, Colour::Black);
+        theBoard[3][7]->setPiece(bqueen.get()); 
+        blackPieces.emplace_back(std::move(bqueen));
+        // King
+        unique_ptr<Piece> bking = make_unique<King>(Coord{4, 7}, Colour::Black);
+        theBoard[4][7]->setPiece(bking.get()); 
+        blackPieces.emplace_back(std::move(bking));
+
+        // Add White King to field whiteKing
+        blackKing = theBoard[4][7];
 
     }
 
@@ -276,7 +350,13 @@ class Board {
         return false;
     }
 
+    friend std::ostream &operator<<(std::ostream &out, const Board &b);
 
 };
+
+std::ostream &operator<<(std::ostream &out, const Board &b) {
+    out << *(b.td);
+    return out;
+}
 
 #endif

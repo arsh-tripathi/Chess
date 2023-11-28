@@ -54,4 +54,5 @@ ostream& operator<<(ostream& out, const TextDisplay& td) {
         }
         out << endl;
     }
+    return out;
 }
