@@ -17,20 +17,9 @@ class Piece
 
   public:
     // ctor/dtor
-    Piece(Coord pos, Colour colour) : pos{pos}, colour{colour}, moveCounter{0}
-    {
-    }
+    Piece(Coord pos, Colour colour) : pos{pos}, colour{colour}, moveCounter{0} {}
     virtual ~Piece() = default;
 
-    int getMoveCounter()
-    {
-        return moveCounter;
-    }
-
-    int incrementMoveCounter()
-    {
-        return ++moveCounter;
-    }
     // methods
     virtual PieceType getPieceType() = 0;
     virtual vector<vector<Coord>> possibleMoves() = 0; // checks for out of bounds
@@ -39,6 +28,11 @@ class Piece
     // getters
     Colour getColour() { return colour;}
     Coord getPos() {return pos;}
+    int getMoveCounter() {return moveCounter;}
+
+    // setters
+    void incrementMoveCounter() {++moveCounter;}
+    void decrementMoveCounter() {--moveCounter;}
 };
 
 #endif

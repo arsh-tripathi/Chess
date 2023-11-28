@@ -1,38 +1,43 @@
 #ifndef __BOARD_H__
 #define __BOARD_H__
 
+#include "globals.h"
 #include "pawn.h"
 #include "king.h"
+#include "queen.h"
+#include "bishop.h"
 #include "knight.h"
+#include "rook.h"
 #include "enums.h"
 #include "textdisplay.h"
 #include "cell.h"
+#include "undoInfo.h"
 
 #include <memory>
 #include <vector>
+#include <utility>
 
 using namespace std;
 
 class Board {
 
-    // move struct
-    struct UndoInfo {
-        Coord start;
-        Coord end;
-        std::unique_ptr<Piece> originalEndPiece;
-    };
-
     UndoInfo undoInfo;
 
-    // **** undo should decrement move counter
+    // **** undo should decrement move counter => done from notify
+    // undo resets the chessboard back to its state one move ago, as stored in undoInfo
     void undo() {
-        theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
-        swap(theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece(), undoInfo.originalEndPiece);
+        // update status
+        status = undoInfo.status;
+        // update white/black turn
+        isWhiteMove = !isWhiteMove;
+        // move pieces back to original
+        theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()], &undoInfo);
+    
     }
 
     // fields
-    std::vector<Piece*> whitePieces;
-    std::vector<Piece*> blackPieces;
+    std::vector<unique_ptr<Piece>> whitePieces;
+    std::vector<unique_ptr<Piece>> blackPieces;
 
     std::vector<std::vector<std::shared_ptr<Cell>>> theBoard;
     std::shared_ptr<TextDisplay> td = nullptr; // initializabled in some init function
@@ -44,18 +49,87 @@ class Board {
 
     public:
     // ctor/dtor
-    Board();
-    ~Board();
-    Board(Board& other);
-    Board(Board&& other);
-    Board& operator=(Board& other);
-    Board& operator=(Board&& other);
+
+    // !!! Remember to add/initialize graphics display once everything is complete
+    Board() : td{make_shared<TextDisplay>()} {
+        // initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
+        for (int r = 0; r < boardSize; ++r) {
+            vector<shared_ptr<Cell>> row;
+            for (int c = 0; c < boardSize; ++c) {
+                row.emplace_back(make_shared<Cell>(Coord{r,c},nullptr,td));
+            }
+            theBoard.emplace_back(row);
+        }
+    }
+
+    ~Board() { // unclear which elements need to be destructed
+    }
+    Board(Board& other) { // shouldn't need for now since we have undo() . may need for AI
+    }
+    Board(Board&& other) { // shouldn't need for now  since we have undo() . may need for AI
+    }
+    Board& operator=(Board& other) { // shouldn't need for now  since we have undo() . may need for AI
+    }
+    Board& operator=(Board&& other) {// shouldn't need for now  since we have undo() . may need for AI
+    }
 
     // methods
-    void setupDefaultBoard(); //init in our uml
 
-    void placePiece(Colour colour, Coord coord, PieceType pt);
-    bool isWhiteTurn();
+    // creates pieces (adds to blackpieces or whitepieces) and places raw pointer at cell
+    void placePiece(Colour colour, Coord coord, PieceType pt) {
+        // create piece
+        unique_ptr<Piece> nPiece;
+        if (pt == PieceType::Pawn) {
+            nPiece = make_unique<Pawn>(coord, colour);
+        } else if (pt == PieceType::Rook) {
+            nPiece = make_unique<Rook>(coord, colour);
+        } else if (pt == PieceType::Knight) {
+            nPiece = make_unique<Knight>(coord, colour);
+        } else if (pt == PieceType::Bishop) {
+            nPiece = make_unique<Bishop>(coord, colour);
+        } else if (pt == PieceType::Queen) {
+            nPiece = make_unique<Queen>(coord, colour);
+        } else if (pt == PieceType::King) {
+            nPiece = make_unique<King>(coord, colour);
+            if (colour == Colour::White) {
+                whiteKing = theBoard[coord.x()][coord.y()];
+            } else {
+                blackKing = theBoard[coord.x()][coord.y()];
+            }
+        } else {
+            cerr << "ERROR: Board.h => void placePiece(...) => invalid PieceType" << endl;
+            // maybe throw exception
+        }
+        // place raw pointer contained in piece to Cell at Coord
+        theBoard[coord.x()][coord.y()]->setPiece(nPiece.get());
+
+        // move ownership to black or white pieces
+        if (colour == Colour::White) {
+            whitePieces.emplace_back(std::move(nPiece)); //!!! make sure this is calling move from <utility>
+        } else if (colour == Colour::Black) {
+            blackPieces.emplace_back(std::move(nPiece)); //!!! make sure this is calling move from <utility>
+        } else {
+            cerr << "ERROR: Board.h => void placePiece(...) => invalid Colour" << endl;
+            // maybe throw exception
+        }
+        
+    }
+
+    // sets up default chess board by calling placePiece(...)
+    void setupDefaultBoard() {
+        // setup white pawns
+        
+        // setup white pieces
+
+        // setup black pawns
+
+        // setup black pieces
+
+    }
+
+    bool isWhiteTurn() {
+        return isWhiteMove;
+    }
 
     bool isPossibleMove(Coord curr, Coord dest) {
         Colour currPlayerColour = Colour::Black;
@@ -67,7 +141,6 @@ class Board {
 
         // check if it is the players piece
         if (theBoard[curr.x()][curr.y()]->getPiece()->getColour() != currPlayerColour) return false;
-        // maybe check for checks?
 
         // checks move orientation based on piece and dest is in bounds of boards
         if (!(theBoard[curr.x()][curr.y()]->getPiece()->isMovePossible(dest))) return false;
@@ -78,7 +151,7 @@ class Board {
 
         // check for obstacle
         if(!singlePathBlockCheck(curr, dest)) return false;
-        return true;      
+        return true;
     }
 
     // **** should increment moveCounter
@@ -91,21 +164,56 @@ class Board {
         if (!isPossibleMove(curr, dest)) return false;
 
         // make the move
-        theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()]);
+        theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
         isWhiteMove = !isWhiteMove;
         
         //***************************** if move is king, we have to fuck everything up fuck WORRY ABOUT LATER!!!!
         if (theBoard[dest.x()][dest.y()]->getPiece()->getPieceType() == PieceType::King) {
-            
+            // !!!!!!!!!!!! ADD !!!!!!!!!!!!
         }
 
         updateState();
         
         // check the state
         if (status == State::Invalid) {
-            undo();
+            undo(); // !!! fix undo
             return false;
         }
+        // detatch all cell observers at c and dest
+        theBoard[curr.x()][curr.y()]->detachAllCellObservers();
+        theBoard[dest.x()][dest.y()]->detachAllCellObservers();
+
+        // !!!attach new cell observers for dest
+        vector<vector<Coord>> newCellObs = theBoard[dest.x()][dest.y()]->getPiece()->possibleMoves();
+        for (size_t r = 0; r < newCellObs.size(); ++r) {
+            for (size_t c = 0; c < newCellObs[r].size(); ++c) {
+                shared_ptr<Cell> targetCell = theBoard[newCellObs[r][c].x()][newCellObs[r][c].y()];
+                Colour col;
+                if (isWhiteMove) {
+                    col = Colour::White;
+                } else {
+                    col = Colour::Black;
+                }
+                // check if the attacked piece is a king of opposite colour of the moved piece
+                if (targetCell->getPiece()->getPieceType() == PieceType::King && targetCell->getPiece()->getColour() == col) {
+                    if (col == Colour::White) {
+                        piecesAttackingWhiteKing.emplace_back(targetCell);
+                    } else {
+                        piecesAttackingBlackKing.emplace_back(targetCell);
+                    }
+                }
+
+                theBoard[dest.x()][dest.y()]->attach(targetCell);
+
+            }
+        }
+
+        // update display observers
+        theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+
+        // update undoInfo (occurs in notify)
+        
+        
 
         return true;
 
