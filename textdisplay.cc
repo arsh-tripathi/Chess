@@ -33,7 +33,7 @@ TextDisplay::TextDisplay() {
 TextDisplay::~TextDisplay() {}
 
 // updates the pieces on the coordinates of c and dest on theDisplay
-void TextDisplay::notify(Cell& c, Cell& dest) {
+void TextDisplay::notify(Cell& c, Cell& dest, UndoInfo* undoInfo, State* state) {
     // update theDisplay at coord of c
     theDisplay[c.getCoordinate().x()][c.getCoordinate().y()] = cellToChar(c);
     // update theDisplay at coord of dest

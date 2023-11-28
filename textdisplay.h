@@ -1,15 +1,13 @@
 #ifndef __TEXTDISPLAY_H__
 #define __TEXTDISPLAY_H__
 
+#include "globals.h"
 #include "cell.h"
 #include "observer.h"
 #include <vector>
 #include <iostream>
 
 using namespace std;
-
-// global constant (should be in own folder)
-const int boardSize = 8;
 
 class TextDisplay: public Observer {
 
@@ -23,9 +21,9 @@ class TextDisplay: public Observer {
     ~TextDisplay();
 
     // updates the pieces on the coordinates of c and dest on theDisplay
-    void notify(Cell& c, Cell& dest);
+    void notify(Cell& c, Cell& dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) override;
 
-    SubscriptionType subType();
+    SubscriptionType subType() override;
 
     friend ostream &operator<<(ostream &out, const TextDisplay &td);
 };
