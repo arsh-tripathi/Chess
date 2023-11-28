@@ -84,6 +84,8 @@ class Board {
     // **** should increment moveCounter
     // **** CASTLE
     // **** EN PASSENT
+    // **** Update undoInfo if move is made!
+    // **** Display doesn't update properly
     bool move(Coord curr, Coord dest) {
         
         if (!isPossibleMove(curr, dest)) return false;
