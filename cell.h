@@ -4,54 +4,51 @@
 #include "coord.h"
 #include "observer.h"
 #include "piece.h"
+#include "undoInfo.h"
 
+#include <memory>
 #include <vector>
 
 class Cell : public Observer
 {
 
     Coord coordinate;
-
-    // definetly going to be shared pointers
-    std::vector<std::unique_ptr<Observer>> observers; // textDisplay, graphicsDisplay and all possibleMoves Cells
-
-    std::unique_ptr<Piece> p;
+    std::vector<std::shared_ptr<Observer>> observers; // textDisplay, graphicsDisplay and all possibleMoves Cells
+    Piece* p;
 
   public:
     Cell(Coord coordinate);
-    Cell(Coord coordinate, Piece p);
+    Cell(Coord coordinate, Piece* p);
+    Cell(Coord coordinate, Piece* p, std::shared_ptr<Observer> o);
     ~Cell();
 
     // I don't think we need copy/move ctor or assignment operator
 
     // switches the pieces
-    void move(Cell &dest, bool updateDisplay = false);
+    void move(Cell &dest, UndoInfo* undoInfo = nullptr, State* state = nullptr);
 
     // tells display observers that piece has been moved
     void notifyDisplayObservers(Cell &dest);
 
     // calls move
-    void notify(Cell &c, Cell &dest) override;
+    void notify(Cell &c, Cell &dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) override;
 
     SubscriptionType subType() override;
 
     // when piece is moved to new cell, we attach all cell
-    void attach(std::unique_ptr<Observer> o);
+    void attach(std::shared_ptr<Observer> o);
 
     // when piece is moved away from cell, we detach all cell observers
     void detachAllCellObservers();
 
     // getters
+    Coord getCoordinate() {return coordinate;}
+    Piece* getPiece() {return p;}
 
-    Coord getCoordinate()
-    {
-        return coordinate;
-    }
+    //setters
+    void setPiece(Piece* new_p) {p = new_p;}
 
-    std::unique_ptr<Piece>& getPiece()
-    {
-        return p;
-    }
+
 };
 
 #endif
