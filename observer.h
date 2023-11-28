@@ -8,7 +8,7 @@ class Cell;
 class Observer
 {
 public:
-    virtual void notify(Cell& c, Cell& dest) = 0;
+    virtual void notify(Cell& c, Cell& dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) = 0;
     virtual SubscriptionType subType() = 0;
     virtual ~Observer() = default;
 };
