@@ -257,26 +257,41 @@ class Board
         }
         // make sure that there exists a piece at curr
         if (theBoard[curr.x()][curr.y()]->getPiece() == nullptr)
+        {
+            cerr << "There is no piece at the specified location" << endl;
             return false;
+        }
 
         // check if it is the players piece
         if (theBoard[curr.x()][curr.y()]->getPiece()->getColour() != currPlayerColour)
+        {
+            cerr << "You tried to move an opponents piece" << endl;
             return false;
+        }
 
         // checks move orientation based on piece and dest is in bounds of boards
         if (!(theBoard[curr.x()][curr.y()]->getPiece()->isMovePossible(dest)))
+        {
+            cerr << "You tried to make a invalid move for the piece type" << endl;
             return false;
+        }
 
         // check if colour piece on dest and curr are same
         if (theBoard[dest.x()][dest.y()]->getPiece() == nullptr)
-            ;
+        {
+        }
         else if (theBoard[curr.x()][curr.y()]->getPiece()->getColour() ==
                  theBoard[dest.x()][dest.y()]->getPiece()->getColour())
+        {
+            cerr << "You tried to capture your own piece" << endl;
             return false;
-
+        }
         // check for obstacle
         if (!singlePathBlockCheck(curr, dest))
+        {
+            cerr << "The path to that cell is blocked" << endl;
             return false;
+        }
         return true;
     }
 
@@ -307,6 +322,7 @@ class Board
         if (status == State::Invalid)
         {
             undo(); // !!! fix undo
+            cerr << "You entered into an invalid state from that move" << endl;
             return false;
         }
         // detatch all cell observers at c and dest
