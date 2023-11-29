@@ -7,12 +7,19 @@
 
 using namespace std;
 
-Cell::Cell(Coord coordinate) : coordinate{coordinate}, p{nullptr} {}
-Cell::Cell(Coord coordinate, Piece* p) : coordinate{coordinate}, p{p} {}
-Cell::Cell(Coord coordinate, Piece* p, std::shared_ptr<Observer> o): coordinate{coordinate}, p{p} {
+Cell::Cell(Coord coordinate) : coordinate{coordinate}, p{nullptr}
+{
+}
+Cell::Cell(Coord coordinate, Piece *p) : coordinate{coordinate}, p{p}
+{
+}
+Cell::Cell(Coord coordinate, Piece *p, std::shared_ptr<Observer> o) : coordinate{coordinate}, p{p}
+{
     observers.emplace_back(o);
 }
-Cell::~Cell() {}
+Cell::~Cell()
+{
+}
 
 // I don't think we need copy/move ctor or assignment operator
 
@@ -20,11 +27,11 @@ Cell::~Cell() {}
 /**
  * All moves should come with a state
  * undoInfo should be included if called from undo
-*/
-void Cell::move(Cell &dest, UndoInfo* undoInfo, State* state)
+ */
+void Cell::move(Cell &dest, UndoInfo *undoInfo, State *state)
 {
     // when is move is confirmed valid by board, calls cell->move()
-    
+
     // this moves piece from (this) position to Cell& dest
     notify(*this, dest, undoInfo, state);
 
@@ -45,10 +52,11 @@ void Cell::notifyDisplayObservers(Cell &dest)
 }
 
 // called by move and actually moves piece at c to dest
-void Cell::notify(Cell &c, Cell &dest, UndoInfo* undoInfo, State* state)
-{   
+void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
+{
 
-    if (state != nullptr) {  // performs normal move
+    if (state != nullptr)
+    { // performs normal move
 
         // undoInfo CANNOT be nullptr or else seg fault
 
@@ -57,21 +65,24 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo* undoInfo, State* state)
         undoInfo->end = dest.getCoordinate();
         undoInfo->status = *state;
         undoInfo->originalEndPiece = dest.getPiece();
-        
+
         // moves piece pointer at c to dest
         dest.setPiece(c.getPiece());
+        dest.getPiece()->setPos(dest.getCoordinate());
         c.setPiece(nullptr);
-        
+
         // increment piece move counter
         dest.getPiece()->incrementMoveCounter();
 
         // detaching happens in board.move() after verifying move is valid
         // attaching new cell observers happens in board.move() because move has access to other cells
-        
-    } else {    // performs undo
-        
+    }
+    else
+    { // performs undo
+
         // write information from UndoInfo => undoInfo is now not usable (cannot stack undos)
         c.setPiece(dest.getPiece());
+        c.getPiece()->setPos(c.getCoordinate());
         dest.setPiece(undoInfo->originalEndPiece);
 
         // decrement pieces move counter at c
