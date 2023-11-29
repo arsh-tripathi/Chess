@@ -1,0 +1,52 @@
+i am a black pawn at [4,1]
+my possible moves are: 
+< [4,0] >
+< [3,0] >
+< [5,0] >
+the move to [4,2] is NOT possible
+i am a white pawn at [4,1]
+my possible moves are: 
+< [4,2] >
+< [5,2] >
+< [3,2] >
+the move to [4,2] is possible
+i am a black pawn at [4,1]
+my possible moves are: 
+< [4,0] >
+< [3,0] >
+< [5,0] >
+< >
+the move to [4,3] is NOT possible
+i am a white pawn at [4,1]
+my possible moves are: 
+< [4,2] >
+< [5,2] >
+< [3,2] >
+< [4,3] >
+the move to [4,3] is possible
+i am a black pawn at [4,1]
+my possible moves are: 
+< [4,0] >
+< [3,0] >
+< [5,0] >
+< >
+the move to [4,0] is possible
+i am a white pawn at [4,1]
+my possible moves are: 
+< [4,2] >
+< [5,2] >
+< [3,2] >
+< [4,3] >
+the move to [4,0] is NOT possible
+i am a black pawn at [7,4]
+my possible moves are: 
+< [7,3] >
+< [6,3] >
+< >
+the move to [8,4] is NOT possible
+i am a white pawn at [7,4]
+my possible moves are: 
+< [7,5] >
+< >
+< [6,5] >
+the move to [8,4] is NOT possible

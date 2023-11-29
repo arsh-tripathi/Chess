@@ -50,6 +50,8 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo* undoInfo, State* state)
 
     if (state != nullptr) {  // performs normal move
 
+        // undoInfo CANNOT be nullptr or else seg fault
+
         // save move information in UndoInfo
         undoInfo->start = c.getCoordinate();
         undoInfo->end = dest.getCoordinate();

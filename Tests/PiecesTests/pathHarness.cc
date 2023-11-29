@@ -8,10 +8,13 @@
 #include "../../coord.h"
 #include <iostream>
 
+// g++-11 -std=c++20 -Wall -g ../../knight.cc ../../bishop.cc ../../queen.cc ../../rook.cc ../../king.cc ../../pawn.cc ../../coord.cc pathHarness.cc -o agh2
+// ~/cs246/1239/tools/produceOutputs suiteP.txt ./agh2
+
 using namespace std;
 
 // printing out coord
-ostream& operator<<(ostream &out, Coord &myC) {
+ostream& operator<<(ostream &out, Coord myC) {
 
     out << "[" << myC.x() << "," << myC.y() << "]";
 
@@ -84,7 +87,8 @@ int main () {
 
             // create piece show possible moves
             Knight myK{myC, Colour::Black};
-            cout << "i am a " << myK.getPieceType() << endl;
+            cout << "i am a " << myK.getPieceType() << " at ";
+            cout << myK.getPos() << endl;
 
             cout << "my possible paths are: " << endl;
             vector<vector<Coord>> moves = myK.possibleMoves();
@@ -119,7 +123,8 @@ int main () {
 
             // create piece show possible moves
             Bishop myB{myC, Colour::Black};
-            cout << "i am a " << myB.getPieceType() << endl;
+            cout << "i am a " << myB.getPieceType() << " at ";
+            cout << myB.getPos() << endl;
 
             cout << "my possible paths are: " << endl;
             vector<vector<Coord>> moves = myB.possibleMoves();
@@ -154,7 +159,8 @@ int main () {
 
             // create piece show possible moves
             Queen myQ{myC, Colour::Black};
-            cout << "i am a " << myQ.getPieceType() << endl;
+            cout << "i am a " << myQ.getPieceType() << " at ";
+            cout << myQ.getPos() << endl;
 
             cout << "my possible paths are: " << endl;
             vector<vector<Coord>> moves = myQ.possibleMoves();
@@ -189,7 +195,8 @@ int main () {
 
             // create piece show possible moves
             Rook myR{myC, Colour::Black};
-            cout << "i am a " << myR.getPieceType() << endl;
+            cout << "i am a " << myR.getPieceType() << " at ";
+            cout << myR.getPos() << endl;
 
             cout << "my possible paths are: " << endl;
             vector<vector<Coord>> moves = myR.possibleMoves();
@@ -228,7 +235,8 @@ int main () {
             King myK{myC, Colour::Black};
             myK.setMoveCounter(numMoves);
 
-            cout << "i am a " << myK.getPieceType() << endl;
+            cout << "i am a " << myK.getPieceType() << " at ";
+            cout << myK.getPos() << endl;
             cout << "my possible moves are: " << endl;
             vector<vector<Coord>> moves = myK.possibleMoves();
 
@@ -263,25 +271,52 @@ int main () {
             cin >> numMoves;
            
             // create piece show possible moves
-            Pawn myP{myC, Colour::Black};
-            myP.setMoveCounter(numMoves);
+            Pawn myP1{myC, Colour::Black};
+            myP1.setMoveCounter(numMoves);
 
-            cout << "i am a " << myP.getPieceType() << endl;
+            cout << "i am a black " << myP1.getPieceType() << " at ";
+            cout << myP1.getPos() << endl;
             cout << "my possible moves are: " << endl;
 
-            vector<vector<Coord>> moves = myP.possibleMoves();
+            vector<vector<Coord>> moves1 = myP1.possibleMoves();
 
-            for (size_t i = 0; i < moves.size(); ++i) {
+            for (size_t i = 0; i < moves1.size(); ++i) {
                 cout << "< ";
-                for(size_t j = 0; j < moves[i].size(); ++j) {
-                    cout << moves[i][j] << " ";
+                for(size_t j = 0; j < moves1[i].size(); ++j) {
+                    cout << moves1[i][j] << " ";
                 }
                 cout << ">" << endl;
             }
 
             // check if destination is valid
             cout << "the move to " << possibleC << " is ";
-            bool possible = myP.isMovePossible(possibleC);
+            bool possible = myP1.isMovePossible(possibleC);
+            if(possible) {
+                cout << "possible" << endl;
+            } else {
+                cout << "NOT possible" << endl;                
+            }
+
+            Pawn myP2{myC, Colour::White};
+            myP2.setMoveCounter(numMoves);
+
+            cout << "i am a white " << myP2.getPieceType() << " at ";
+            cout << myP2.getPos() << endl;
+            cout << "my possible moves are: " << endl;
+
+            vector<vector<Coord>> moves2 = myP2.possibleMoves();
+
+            for (size_t i = 0; i < moves2.size(); ++i) {
+                cout << "< ";
+                for(size_t j = 0; j < moves2[i].size(); ++j) {
+                    cout << moves2[i][j] << " ";
+                }
+                cout << ">" << endl;
+            }
+
+            // check if destination is valid
+            cout << "the move to " << possibleC << " is ";
+            possible = myP2.isMovePossible(possibleC);
             if(possible) {
                 cout << "possible" << endl;
             } else {

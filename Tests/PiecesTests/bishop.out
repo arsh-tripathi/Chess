@@ -1,0 +1,28 @@
+i am a bishop at [0,0]
+my possible paths are: 
+< [1,1] [2,2] [3,3] [4,4] [5,5] [6,6] [7,7] >
+< >
+< >
+< >
+the move to [3,0] is NOT possible
+i am a bishop at [4,4]
+my possible paths are: 
+< [5,5] [6,6] [7,7] >
+< [5,3] [6,2] [7,1] >
+< [3,3] [2,2] [1,1] [0,0] >
+< [3,5] [2,6] [1,7] >
+the move to [6,6] is possible
+i am a bishop at [7,4]
+my possible paths are: 
+< >
+< >
+< [6,3] [5,2] [4,1] [3,0] >
+< [6,5] [5,6] [4,7] >
+the move to [8,3] is NOT possible
+i am a bishop at [4,0]
+my possible paths are: 
+< [5,1] [6,2] [7,3] >
+< >
+< >
+< [3,1] [2,2] [1,3] [0,4] >
+the move to [2,2] is possible
