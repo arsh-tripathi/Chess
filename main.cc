@@ -8,9 +8,9 @@ int main(void)
     Board b;
     b.setupDefaultBoard();
     cout << "Board was setup" << endl;
+    std::cout << b;
     if (b.isWhiteTurn())
         cout << "It is whites turn" << endl;
-    if (b.move(Coord{1, 1}, Coord{1, 2}))
-        cout << "I can and have moved the pawn from b2 to b3";
+    b.move(Coord{1, 1}, Coord{1, 2});
     std::cout << b;
 }

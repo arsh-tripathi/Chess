@@ -329,9 +329,11 @@ class Board
                 {
                     col = Colour::Black;
                 }
-                // check if the attacked piece is a king of opposite colour of the moved piece
-                if (targetCell == nullptr || targetCell->getPiece() == nullptr)
+                if (!targetCell || !targetCell->getPiece())
+                {
                     continue;
+                }
+                // check if the attacked piece is a king of opposite colour of the moved piece
                 if (targetCell->getPiece()->getPieceType() == PieceType::King &&
                     targetCell->getPiece()->getColour() == col)
                 {
