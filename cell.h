@@ -14,24 +14,24 @@ class Cell : public Observer
 
     Coord coordinate;
     std::vector<std::shared_ptr<Observer>> observers; // textDisplay, graphicsDisplay and all possibleMoves Cells
-    Piece* p;
+    Piece *p;
 
   public:
     Cell(Coord coordinate);
-    Cell(Coord coordinate, Piece* p);
-    Cell(Coord coordinate, Piece* p, std::shared_ptr<Observer> o);
+    Cell(Coord coordinate, Piece *p);
+    Cell(Coord coordinate, Piece *p, std::shared_ptr<Observer> o);
     ~Cell();
 
     // I don't think we need copy/move ctor or assignment operator
 
     // switches the pieces
-    void move(Cell &dest, UndoInfo* undoInfo = nullptr, State* state = nullptr);
+    void move(Cell &dest, UndoInfo *undoInfo = nullptr, State *state = nullptr);
 
     // tells display observers that piece has been moved
     void notifyDisplayObservers(Cell &dest);
 
     // calls move
-    void notify(Cell &c, Cell &dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) override;
+    void notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state) override;
 
     SubscriptionType subType() override;
 
@@ -42,13 +42,20 @@ class Cell : public Observer
     void detachAllCellObservers();
 
     // getters
-    Coord getCoordinate() {return coordinate;}
-    Piece* getPiece() {return p;}
+    Coord getCoordinate()
+    {
+        return coordinate;
+    }
+    Piece *getPiece()
+    {
+        return p;
+    }
 
-    //setters
-    void setPiece(Piece* new_p) {p = new_p;}
-
-
+    // setters
+    void setPiece(Piece *new_p)
+    {
+        p = new_p;
+    }
 };
 
 #endif
