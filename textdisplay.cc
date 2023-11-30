@@ -81,11 +81,14 @@ ostream &operator<<(ostream &out, const TextDisplay &td)
 {
     for (int r = boardSize - 1; r >= 0; --r)
     {
+        out << r << " ";
         for (int c = 0; c < boardSize; ++c)
         {
             out << td.theDisplay[c][r];
+            out << " ";
         }
         out << endl;
     }
+    out << "  0 1 2 3 4 5 6 7" << endl;
     return out;
 }

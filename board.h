@@ -248,6 +248,13 @@ class Board
         return isWhiteMove;
     }
 
+    /**
+     * Is possible moves checks the following:
+     *  1) There is a piece of same colour player that is moving at curr
+     *  2) checks move orientation based on piece at curr and out of bounds
+     *  3) checks if we capture our own piece
+     *  4) checks path block
+     * */
     bool isPossibleMove(Coord curr, Coord dest)
     {
         Colour currPlayerColour = Colour::Black;
@@ -294,7 +301,78 @@ class Board
         }
         return true;
     }
+    private:
+    // actually make an enpassant move or return false
+    bool enPassentMove(Coord curr, Coord dest, const Coord capturedPiece) {
+        // move the pawn 
+        theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
+        isWhiteMove = !isWhiteMove;
+        // check invalidity if invald undo and return false
+        updateState();
+        if (status == State::Invalid) 
+        {
+            undo(); // !!! fix undo
+            cerr << "You entered into an invalid state from that ENPASSANT move" << endl;
+            return false;
+        }
+        // if valid cature the other pawn return true
+        theBoard[capturedPiece.x()][capturedPiece.y()]->getPiece()->setAlive(false);
+        theBoard[capturedPiece.x()][capturedPiece.y()]->setPiece(nullptr);
+        theBoard[capturedPiece.x()][capturedPiece.y()]->notifyDisplayObservers(*theBoard[0][0]);
+        theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+        return true;
+    }
 
+    bool promotion (Coord curr, Coord dest) {
+        // move the pawn 
+        theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
+        isWhiteMove = !isWhiteMove;
+        // check invalidity if invald undo and return false
+        updateState();
+        if (status == State::Invalid) 
+        {
+            undo(); // !!! fix undo
+            cerr << "You entered into an invalid state from that PROMOTION move" << endl;
+            return false;
+        }
+        // if valid cature the other pawn return true
+        theBoard[dest.x()][dest.y()]->getPiece()->setAlive(false);
+        theBoard[dest.x()][dest.y()]->setPiece(nullptr);
+        PieceType pt;
+        bool notGotPiece = true;
+        while (notGotPiece) {
+            cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
+            char piece;
+            if (cin >> piece) {
+                switch (piece) {
+                    case 'R':
+                        pt = PieceType::Rook;
+                        notGotPiece = false;
+                        break;
+                    case 'N':
+                        pt = PieceType::Knight;
+                        notGotPiece = false;
+                        break;
+                    case 'B':
+                        pt = PieceType::Bishop;
+                        notGotPiece = false;
+                        break;
+                    case 'Q':
+                        pt = PieceType::Queen;
+                        notGotPiece = false;
+                        break;
+                    default:
+                        cout << "Please enter a valid piece type to promote" << endl;
+                }
+                // remember colour is opposite of isWhiteMove
+            }
+        }
+        Colour col = isWhiteMove? Colour::Black: Colour::White;
+        placePiece(col, dest, pt);
+        theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+        return true;
+    }
+    public:
     // **** should increment moveCounter
     // **** CASTLE
     // **** EN PASSENT
@@ -306,15 +384,37 @@ class Board
         if (!isPossibleMove(curr, dest))
             return false;
 
+        // special handling for pawn moves
+        if (theBoard[curr.x()][curr.y()]->getPiece()->getPieceType() == PieceType::Pawn)
+        {
+            if ((dest - curr).x() == 0) { // move forward
+                if (theBoard[dest.x()][dest.y()]->getPiece()) return false;
+                int lastrow = isWhiteMove? 7 : 0;
+                if (dest.y() == lastrow) return promotion(curr, dest);
+            } else { // captures
+                int lastrow = isWhiteMove? 7 : 0;
+                if (dest.y() == lastrow) return promotion(curr, dest); // pawn promotion
+
+                if (!(theBoard[dest.x()][dest.y()]->getPiece())){ // normal capture
+                    int difference = isWhiteMove? -1: 1;
+                    if (!(theBoard[dest.x()][dest.y()+difference]->getPiece())) return false; // the passanted square doesn't have a piece
+                    if (theBoard[dest.x()][dest.y()+difference]->getPiece()->getPieceType() != PieceType::Pawn) return false; // the passanted square dosen't have a pawn
+                    if (!(undoInfo.end == Coord{dest.x(), dest.y() + difference})) return false; // last move was not the pawn move
+                    if (!(undoInfo.end - undoInfo.start == Coord{0,2} || undoInfo.end - undoInfo.start == Coord{0, -2})) return false; // last move was a double move
+                    return enPassentMove(curr, dest, Coord{dest.x(), dest.y()+difference});
+                }
+            }
+        }
+        //***************************** if move is king, we have to fuck everything up fuck WORRY ABOUT LATER!!!!
+        if (theBoard[curr.x()][curr.y()]->getPiece()->getPieceType() == PieceType::King)
+        {
+            // !!!!!!!!!!!! ADD !!!!!!!!!!!!
+        }
+
         // make the move
         theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
         isWhiteMove = !isWhiteMove;
 
-        //***************************** if move is king, we have to fuck everything up fuck WORRY ABOUT LATER!!!!
-        if (theBoard[dest.x()][dest.y()]->getPiece()->getPieceType() == PieceType::King)
-        {
-            // !!!!!!!!!!!! ADD !!!!!!!!!!!!
-        }
 
         updateState();
 
@@ -391,6 +491,7 @@ class Board
                 if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate()))
                 {
                     status = State::Invalid;
+                    return;
                 }
             }
         }
@@ -402,6 +503,7 @@ class Board
                 if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate()))
                 {
                     status = State::Invalid;
+                    return;
                 }
             }
         }
