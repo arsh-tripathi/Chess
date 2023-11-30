@@ -14,6 +14,7 @@ class Piece
     Coord pos;
     Colour colour;
     int moveCounter;
+    bool isAlive = true;
 
   public:
     // ctor/dtor
@@ -53,6 +54,12 @@ class Piece
     void setPos(Coord c)
     {
         pos = c;
+    }
+    bool getAlive() {
+        return isAlive;
+    }
+    void setAlive(bool b) {
+        isAlive = b;
     }
 };
 

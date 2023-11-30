@@ -65,6 +65,8 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
         undoInfo->end = dest.getCoordinate();
         undoInfo->status = *state;
         undoInfo->originalEndPiece = dest.getPiece();
+        // set piece to die
+        if (dest.getPiece()) dest.getPiece()->setAlive(false);
 
         // moves piece pointer at c to dest
         dest.setPiece(c.getPiece());
@@ -84,6 +86,8 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
         c.setPiece(dest.getPiece());
         c.getPiece()->setPos(c.getCoordinate());
         dest.setPiece(undoInfo->originalEndPiece);
+        // set piece to alive
+        if (dest.getPiece()) dest.getPiece()->setAlive(true);
 
         // decrement pieces move counter at c
         c.getPiece()->decrementMoveCounter();
