@@ -441,10 +441,15 @@ class Board
             Colour c = isWhiteMove ? Colour::Black : Colour::White;
             isWhiteMove = !isWhiteMove;
 
+            // get the piece on the destination sqaure to handle capturing into a check
+            Piece *tmpPiece = theBoard[dest.x()][dest.y()]->getPiece();
+            // set the destination piece to a nullptr
+            theBoard[dest.x()][dest.y()]->setPiece(nullptr);
             if (c == Colour::Black) { // call isPossibleMove for all alive black pieces to dest
                 for (size_t i = 0; i < blackPieces.size(); ++i) {
                     if (isPossibleMove(blackPieces[i]->getPos(), dest)) {
                         isWhiteMove = !isWhiteMove;
+                        theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
                         return false;
                     }
                 }
@@ -452,11 +457,12 @@ class Board
                 for (size_t i = 0; i < whitePieces.size(); ++i) {
                     if (isPossibleMove(whitePieces[i]->getPos(), dest)) {
                         isWhiteMove = !isWhiteMove;
+                        theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
                         return false;
                     }
                 }
             }
-
+            theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
             // make the move
             theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
             // update pieces attacking king
