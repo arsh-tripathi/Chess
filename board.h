@@ -392,11 +392,7 @@ class Board
     }
 
   public:
-    // **** should increment moveCounter
     // **** CASTLE
-    // **** EN PASSENT
-    // **** Update undoInfo if move is made!
-    // **** Display doesn't update properly
     bool move(Coord curr, Coord dest)
     {
 
@@ -440,7 +436,48 @@ class Board
         // up fuck WORRY ABOUT LATER!!!!
         if (theBoard[curr.x()][curr.y()]->getPiece()->getPieceType() == PieceType::King)
         {
-            // !!!!!!!!!!!! ADD !!!!!!!!!!!!
+            if (!isPossibleMove(curr, dest)) return false;
+            // check if the king is moving into a check
+            Colour c = isWhiteMove ? Colour::Black : Colour::White;
+            isWhiteMove = !isWhiteMove;
+
+            if (c == Colour::Black) { // call isPossibleMove for all alive black pieces to dest
+                for (size_t i = 0; i < blackPieces.size(); ++i) {
+                    if (isPossibleMove(blackPieces[i]->getPos(), dest)) {
+                        isWhiteMove = !isWhiteMove;
+                        return false;
+                    }
+                }
+            } else {
+                for (size_t i = 0; i < whitePieces.size(); ++i) {
+                    if (isPossibleMove(whitePieces[i]->getPos(), dest)) {
+                        isWhiteMove = !isWhiteMove;
+                        return false;
+                    }
+                }
+            }
+
+            // make the move
+            theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
+            // update pieces attacking king
+            if (c == Colour::Black) { // call isPossibleMove for all alive black pieces to dest
+                whiteKing = theBoard[dest.x()][dest.y()]; // king cell
+                piecesAttackingWhiteKing.clear();
+                for (size_t i = 0; i < blackPieces.size(); ++i) {
+                    if (blackPieces[i]->isMovePossible(dest)) piecesAttackingWhiteKing.emplace_back(theBoard[blackPieces[i]->getPos().x()][blackPieces[i]->getPos().y()]);
+                }
+            } else {
+                blackKing = theBoard[dest.x()][dest.y()]; // king cell
+                piecesAttackingBlackKing.clear();
+                for (size_t i = 0; i < whitePieces.size(); ++i) {
+                    if (whitePieces[i]->isMovePossible(dest)) piecesAttackingBlackKing.emplace_back(theBoard[whitePieces[i]->getPos().x()][whitePieces[i]->getPos().y()]);
+                }
+            }
+
+            // update display observers
+            theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+
+            return true;
         }
 
         // make the move
@@ -485,21 +522,15 @@ class Board
                     continue;
                 }
                 // check if the attacked piece is a king of opposite colour of the moved
-                // piece toggleTurn(); // doesnt work NOT NECESSARILY ATTACKED THO COULD
-                // BE BLOCKED ??
                 if (targetCell->getPiece()->getPieceType() == PieceType::King &&
                     targetCell->getPiece()->getColour() == col) // added condition
                 {
-                    if (isPossibleMove(dest, targetCell->getCoordinate()))
-                        status = State::Check;
-                    if (col == Colour::White)
-                    {
-                        piecesAttackingWhiteKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
+                    if (isPossibleMove(dest, targetCell->getCoordinate())) {
+                        status = State::Check; // the move caused an actual check
+                        cerr << "CHECK!!! LLLL" << endl;
                     }
-                    else
-                    {
-                        piecesAttackingBlackKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
-                    }
+                    if (col == Colour::White) piecesAttackingWhiteKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
+                    else piecesAttackingBlackKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
                 }
                 // toggleTurn();
                 theBoard[dest.x()][dest.y()]->attach(targetCell); // this is fine
