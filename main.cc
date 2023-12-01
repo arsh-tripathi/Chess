@@ -7,18 +7,20 @@ using namespace std;
 
 int main(void)
 {
+    ofstream movesFile{"moves.txt"};
     Board b;
     // ask for players types possibly here
     b.setupDefaultBoard();
     cout << "Board was setup" << endl;
     std::cout << b;
     // harness begins here
-    string line;
-    while (getline(cin, line))
+    char cmd;
+    while (cin >> cmd)
     {
+        string line;
+        getline(cin, line);
         istringstream in{line};
-        char cmd;
-        in >> cmd;
+
         switch (cmd)
         {
         case 'q':
@@ -27,6 +29,7 @@ int main(void)
         case 'm':
             int w, x, y, z;
             in >> w >> x >> y >> z;
+            movesFile << cmd << " " << w << " " << x << " " << y << " " << z << " " << endl;
             if (in.fail())
             {
                 cout << "Please provide valid coordinates for the move" << endl;

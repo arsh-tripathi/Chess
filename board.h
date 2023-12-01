@@ -13,6 +13,7 @@
 #include "textdisplay.h"
 #include "undoInfo.h"
 
+#include <fstream>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -248,6 +249,11 @@ class Board
         return isWhiteMove;
     }
 
+    void toggleTurn()
+    {
+        isWhiteMove = !isWhiteMove;
+    }
+
     /**
      * Is possible moves checks the following:
      *  1) There is a piece of same colour player that is moving at curr
@@ -301,15 +307,17 @@ class Board
         }
         return true;
     }
-    private:
+
+  private:
     // actually make an enpassant move or return false
-    bool enPassentMove(Coord curr, Coord dest, const Coord capturedPiece) {
-        // move the pawn 
+    bool enPassentMove(Coord curr, Coord dest, const Coord capturedPiece)
+    {
+        // move the pawn
         theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
         isWhiteMove = !isWhiteMove;
         // check invalidity if invald undo and return false
         updateState();
-        if (status == State::Invalid) 
+        if (status == State::Invalid)
         {
             undo(); // !!! fix undo
             cerr << "You entered into an invalid state from that ENPASSANT move" << endl;
@@ -323,57 +331,61 @@ class Board
         return true;
     }
 
-    bool promotion (Coord curr, Coord dest) {
-        // move the pawn 
+    bool promotion(Coord curr, Coord dest)
+    {
+        // move the pawn
         theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
         isWhiteMove = !isWhiteMove;
         // check invalidity if invald undo and return false
         updateState();
-        if (status == State::Invalid) 
+        if (status == State::Invalid)
         {
             undo(); // !!! fix undo
             cerr << "You entered into an invalid state from that PROMOTION move" << endl;
             return false;
         }
-        // if valid cature the other pawn return true
+        // if valid capture the other pawn return true
         theBoard[dest.x()][dest.y()]->getPiece()->setAlive(false);
         theBoard[dest.x()][dest.y()]->setPiece(nullptr);
         PieceType pt;
         bool notGotPiece = true;
-        while (notGotPiece) {
+        while (notGotPiece)
+        {
             cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
             char piece;
-            if (cin >> piece) {
-                switch (piece) {
-                    case 'R':
-                        pt = PieceType::Rook;
-                        notGotPiece = false;
-                        break;
-                    case 'N':
-                        pt = PieceType::Knight;
-                        notGotPiece = false;
-                        break;
-                    case 'B':
-                        pt = PieceType::Bishop;
-                        notGotPiece = false;
-                        break;
-                    case 'Q':
-                        pt = PieceType::Queen;
-                        notGotPiece = false;
-                        break;
-                    default:
-                        cout << "Please enter a valid piece type to promote" << endl;
+            if (cin >> piece)
+            {
+                switch (piece)
+                {
+                case 'R':
+                    pt = PieceType::Rook;
+                    notGotPiece = false;
+                    break;
+                case 'N':
+                    pt = PieceType::Knight;
+                    notGotPiece = false;
+                    break;
+                case 'B':
+                    pt = PieceType::Bishop;
+                    notGotPiece = false;
+                    break;
+                case 'Q':
+                    pt = PieceType::Queen;
+                    notGotPiece = false;
+                    break;
+                default:
+                    cout << "Please enter a valid piece type to promote" << endl;
                 }
                 // remember colour is opposite of isWhiteMove
             }
         }
-        Colour col = isWhiteMove? Colour::Black: Colour::White;
+        Colour col = isWhiteMove ? Colour::Black : Colour::White;
         placePiece(col, dest, pt);
         theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
         return true;
     }
 
-    public:
+  public:
     // **** should increment moveCounter
     // **** CASTLE
     // **** EN PASSENT
@@ -388,21 +400,33 @@ class Board
         // special handling for pawn moves
         if (theBoard[curr.x()][curr.y()]->getPiece()->getPieceType() == PieceType::Pawn)
         {
-            if ((dest - curr).x() == 0) { // move forward
-                if (theBoard[dest.x()][dest.y()]->getPiece()) return false;
-                int lastrow = isWhiteMove? 7 : 0;
-                if (dest.y() == lastrow) return promotion(curr, dest);
-            } else { // captures
-                int lastrow = isWhiteMove? 7 : 0;
-                if (dest.y() == lastrow) return promotion(curr, dest); // pawn promotion
+            if ((dest - curr).x() == 0)
+            { // move forward in straight line
+                if (theBoard[dest.x()][dest.y()]->getPiece())
+                    return false; // theres a piece in front of me
+                int lastrow = isWhiteMove ? 7 : 0;
+                if (dest.y() == lastrow)
+                    return promotion(curr, dest); // promo now
+            }
+            else
+            { // captures we moving diagonal cuh
+                int lastrow = isWhiteMove ? 7 : 0;
+                if (dest.y() == lastrow)
+                    return promotion(curr, dest); // capture into pawn promotion
 
-                if (!(theBoard[dest.x()][dest.y()]->getPiece())){ // normal capture
-                    int difference = isWhiteMove? -1: 1;
-                    if (!(theBoard[dest.x()][dest.y()+difference]->getPiece())) return false; // the passanted square doesn't have a piece
-                    if (theBoard[dest.x()][dest.y()+difference]->getPiece()->getPieceType() != PieceType::Pawn) return false; // the passanted square dosen't have a pawn
-                    if (!(undoInfo.end == Coord{dest.x(), dest.y() + difference})) return false; // last move was not the pawn move
-                    if (!(undoInfo.end - undoInfo.start == Coord{0,2} || undoInfo.end - undoInfo.start == Coord{0, -2})) return false; // last move was a double move
-                    return enPassentMove(curr, dest, Coord{dest.x(), dest.y()+difference});
+                if (!(theBoard[dest.x()][dest.y()]->getPiece()))
+                { // no piece diagonally must be en passant
+                    int difference = isWhiteMove ? -1 : 1;
+                    if (!(theBoard[dest.x()][dest.y() + difference]->getPiece()))
+                        return false; // the passanted square doesn't have a piece
+                    if (theBoard[dest.x()][dest.y() + difference]->getPiece()->getPieceType() != PieceType::Pawn)
+                        return false; // the passanted square dosen't have a pawn
+                    if (!(undoInfo.end == Coord{dest.x(), dest.y() + difference}))
+                        return false; // last move was not the pawn move
+                    if (!(undoInfo.end - undoInfo.start == Coord{0, 2} ||
+                          undoInfo.end - undoInfo.start == Coord{0, -2}))
+                        return false; // last wasn't double jump
+                    return enPassentMove(curr, dest, Coord{dest.x(), dest.y() + difference});
                 }
             }
         }
@@ -415,7 +439,6 @@ class Board
         // make the move
         theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
         isWhiteMove = !isWhiteMove;
-
 
         updateState();
 
@@ -431,13 +454,17 @@ class Board
         theBoard[dest.x()][dest.y()]->detachAllCellObservers();
 
         // !!!attach new cell observers for dest
+
+        // JUST POSSIBLE MOVES SHOULD MAYBE CHECK FOR BLOCK PATHS ASWELL SO KNOW IF KING IS
+        // "ACTUALLY" UNDER ATTACK
+
         vector<vector<Coord>> newCellObs = theBoard[dest.x()][dest.y()]->getPiece()->possibleMoves();
         for (size_t r = 0; r < newCellObs.size(); ++r)
         {
             for (size_t c = 0; c < newCellObs[r].size(); ++c)
             {
                 shared_ptr<Cell> targetCell = theBoard[newCellObs[r][c].x()][newCellObs[r][c].y()];
-                Colour col;
+                Colour col; // this king is under attack
                 if (isWhiteMove)
                 {
                     col = Colour::White;
@@ -446,25 +473,27 @@ class Board
                 {
                     col = Colour::Black;
                 }
-                if (!targetCell || !targetCell->getPiece())
+                if (!targetCell || !targetCell->getPiece()) // what sthe point of this check
                 {
                     continue;
                 }
                 // check if the attacked piece is a king of opposite colour of the moved piece
+                // toggleTurn(); // doesnt work
+                // NOT NECESSARILY ATTACKED THO COULD BE BLOCKED ??
                 if (targetCell->getPiece()->getPieceType() == PieceType::King &&
-                    targetCell->getPiece()->getColour() == col)
+                    targetCell->getPiece()->getColour() == col) // added condition
                 {
                     if (col == Colour::White)
                     {
-                        piecesAttackingWhiteKing.emplace_back(targetCell);
+                        piecesAttackingWhiteKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
                     }
                     else
                     {
-                        piecesAttackingBlackKing.emplace_back(targetCell);
+                        piecesAttackingBlackKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
                     }
                 }
-
-                theBoard[dest.x()][dest.y()]->attach(targetCell);
+                // toggleTurn();
+                theBoard[dest.x()][dest.y()]->attach(targetCell); // this is fine
             }
         }
 
@@ -479,19 +508,22 @@ class Board
     // !!!! cannot short castle
     bool shortCastle()
     {
-        Colour c = isWhiteMove? Colour::White: Colour::Black;
+        Colour c = isWhiteMove ? Colour::White : Colour::Black;
         if (c == Colour::White)
         {
-            if (whiteKing->getPiece()->getMoveCounter() != 0) return false; // king has moved
-            if (!theBoard[7][0]->getPiece()) return false; // there is no piece at the required location
-            if (theBoard[7][0]->getPiece()->getPieceType() != PieceType::Rook) return false; // Owen made me do this
-            if (theBoard[7][0]->getPiece()->getMoveCounter() != 0) return false; // rook has moved
-            if (theBoard[6][0]->getPiece() || theBoard[5][0]->getPiece()) return false; // pieces block castle
-
+            if (whiteKing->getPiece()->getMoveCounter() != 0)
+                return false; // king has moved
+            if (!theBoard[7][0]->getPiece())
+                return false; // there is no piece at the required location
+            if (theBoard[7][0]->getPiece()->getPieceType() != PieceType::Rook)
+                return false; // Owen made me do this
+            if (theBoard[7][0]->getPiece()->getMoveCounter() != 0)
+                return false; // rook has moved
+            if (theBoard[6][0]->getPiece() || theBoard[5][0]->getPiece())
+                return false; // pieces block castle
         }
-        else 
+        else
         {
-
         }
         return false;
     }
@@ -508,10 +540,6 @@ class Board
 
     vector<shared_ptr<Cell>> piecesAttackingWhiteKing;
     vector<shared_ptr<Cell>> piecesAttackingBlackKing;
-
-    // updateState() checks if the current state of the board is invalid.
-    //   A board is in an invalid state if it the person who's turn it is can take
-    //   the oponenet's king.
     void updateState()
     {
         if (isWhiteMove)
@@ -556,7 +584,7 @@ class Board
         auto currCellPtr = theBoard[curr.x()][curr.y()];
         vector<vector<Coord>> possibleMovesUnfiltered = currCellPtr->getPiece()->possibleMoves();
         vector<shared_ptr<Cell>> errorremover;
-        return errorremover;
+        return errorremover; // wtf is this
     }
 
   private:
@@ -576,9 +604,9 @@ class Board
             for (size_t c = 0; c < pmoves[r].size(); ++c)
             {
                 if (theBoard[pmoves[r][c].x()][pmoves[r][c].y()]->getCoordinate() == dest)
-                    return true;
+                    return true; // found path yay
                 else if (theBoard[pmoves[r][c].x()][pmoves[r][c].y()]->getPiece() != nullptr)
-                    break;
+                    break; // check different path
             }
         }
         return false;
@@ -586,6 +614,8 @@ class Board
 
     friend std::ostream &operator<<(std::ostream &out, const Board &b);
 };
+
+// overload for testing
 
 std::ostream &operator<<(std::ostream &out, const Board &b)
 {
