@@ -1,0 +1,11 @@
+///// undoInfo /////
+start: 3,6
+end: 3,5
+status: Normal
+original end piece: none
+
+///// piecesAttackingWhiteKing /////
+
+///// piecesAttackingBlackKing /////
+0,3
+

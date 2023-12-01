@@ -83,14 +83,14 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
     { // performs undo
 
         // write information from UndoInfo => undoInfo is now not usable (cannot stack undos)
-        c.setPiece(dest.getPiece());
-        c.getPiece()->setPos(c.getCoordinate());
-        dest.setPiece(undoInfo->originalEndPiece);
+        dest.setPiece(c.getPiece());
+        dest.getPiece()->setPos(dest.getCoordinate());
+        c.setPiece(undoInfo->originalEndPiece);
         // set piece to alive
-        if (dest.getPiece()) dest.getPiece()->setAlive(true);
+        if (c.getPiece()) c.getPiece()->setAlive(true);
 
         // decrement pieces move counter at c
-        c.getPiece()->decrementMoveCounter();
+        dest.getPiece()->decrementMoveCounter();
 
         // reset state is done when undo() is called in board
     }
