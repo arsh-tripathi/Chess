@@ -1,16 +1,14 @@
 ///// undoInfo /////
-start: 3,7
-end: 7,3
-status: Normal
-original end piece: pawn
+start: 4,7
+end: 4,6
+status: Check
+original end piece: bishop
 
 ///// State /////
-state is: Normal
+state is: Check
 
 ///// piecesAttackingWhiteKing /////
-4,5
-4,4
-7,3
 
 ///// piecesAttackingBlackKing /////
+4,3
 
