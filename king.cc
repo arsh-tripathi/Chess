@@ -6,8 +6,9 @@
 
 using namespace std;
 
-static const vector<vector<Coord>> FIRSTMOVES{{{0, 1}}, {{1, 1}}, {{1, 0}}, {{2, 0}}, {{1, -1}},
-                                                {{0, -1}}, {{-1, -1}}, {{-2, 0}}, {{-1, 0}}, {{-1, 1}}};
+// DELETE FURTHER MOVES WE WILL HANDLE IT IN BOARD
+static const vector<vector<Coord>> FIRSTMOVES{{{0, 1}}, {{1, 1}}, {{1, 0}}, {{1, -1}},
+                                                {{0, -1}}, {{-1, -1}}, {{-1, 0}}, {{-1, 1}}};
 static const vector<vector<Coord>> FURTHERMOVES{{{0, 1}}, {{1, 1}}, {{1, 0}}, {{1, -1}},
                                                 {{0, -1}}, {{-1, -1}}, {{-1, 0}}, {{-1, 1}}};
 

@@ -372,6 +372,7 @@ class Board
         theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
         return true;
     }
+
     public:
     // **** should increment moveCounter
     // **** CASTLE
@@ -473,6 +474,32 @@ class Board
         // update undoInfo (occurs in notify)
 
         return true;
+    }
+
+    // !!!! cannot short castle
+    bool shortCastle()
+    {
+        Colour c = isWhiteMove? Colour::White: Colour::Black;
+        if (c == Colour::White)
+        {
+            if (whiteKing->getPiece()->getMoveCounter() != 0) return false; // king has moved
+            if (!theBoard[7][0]->getPiece()) return false; // there is no piece at the required location
+            if (theBoard[7][0]->getPiece()->getPieceType() != PieceType::Rook) return false; // Owen made me do this
+            if (theBoard[7][0]->getPiece()->getMoveCounter() != 0) return false; // rook has moved
+            if (theBoard[6][0]->getPiece() || theBoard[5][0]->getPiece()) return false; // pieces block castle
+
+        }
+        else 
+        {
+
+        }
+        return false;
+    }
+
+    // !!!! cannot short castle
+    bool longCastle()
+    {
+        return false;
     }
 
   private:

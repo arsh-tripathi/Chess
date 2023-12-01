@@ -37,6 +37,33 @@ int main(void)
                 cout << "Invalid move. kindly make a move again" << endl;
             }
             break;
+        case 'c':
+            char t;
+            in >> t;
+            if (in.fail())
+            {
+                cout << "Please enter a valid type of castle" << endl;
+            }
+            if (t == 's')
+            {
+                // short castle
+                if (!b.shortCastle())
+                {
+                    cout << "Unable to castle" << endl;
+                }
+            }
+            else if (t == 'l')
+            {
+                // long castle
+                if (!b.longCastle())
+                {
+                    cout << "Unable to castle" << endl;
+                }
+            }
+            else 
+            {
+                cout << "Please enter a valid type of castle" << endl;
+            }
         default:
             cout << "Invalid command, please enter a valid command" << endl;
         }
