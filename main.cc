@@ -13,10 +13,9 @@ int main(void)
     cout << "Board was setup" << endl;
     std::cout << b;
     // harness begins here
-    while (true)
+    string line;
+    while (getline(cin, line))
     {
-        string line;
-        getline(cin, line);
         istringstream in{line};
         char cmd;
         in >> cmd;

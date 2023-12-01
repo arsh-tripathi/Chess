@@ -508,6 +508,10 @@ class Board
 
     vector<shared_ptr<Cell>> piecesAttackingWhiteKing;
     vector<shared_ptr<Cell>> piecesAttackingBlackKing;
+
+    // updateState() checks if the current state of the board is invalid.
+    //   A board is in an invalid state if it the person who's turn it is can take
+    //   the oponenet's king.
     void updateState()
     {
         if (isWhiteMove)
