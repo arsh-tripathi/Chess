@@ -524,11 +524,15 @@ class Board
                 // check if the attacked piece is a king of opposite colour of the moved
                 if (targetCell->getPiece()->getPieceType() == PieceType::King &&
                     targetCell->getPiece()->getColour() == col) // added condition
-                {
+                {   
+
+                    isWhiteMove = !isWhiteMove;
                     if (isPossibleMove(dest, targetCell->getCoordinate())) {
                         status = State::Check; // the move caused an actual check
                         cerr << "CHECK!!! LLLL" << endl;
                     }
+                    isWhiteMove = !isWhiteMove;
+
                     if (col == Colour::White) piecesAttackingWhiteKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
                     else piecesAttackingBlackKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
                 }
@@ -541,6 +545,15 @@ class Board
         theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
 
         // update undoInfo (occurs in notify)
+
+
+        // TODO!!!!!
+        if (status == State::Check) { // check for possible checkmate
+
+        } else { // check for possible stalemate
+
+        }
+
 
         return true;
     }
