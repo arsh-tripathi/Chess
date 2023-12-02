@@ -744,7 +744,7 @@ class Board
 
   public:
     // checks if Cell is on the table and cell is not allied piece
-    std::vector<std::shared_ptr<Cell>> possibleMoves(Coord curr)
+    std::vector<std::shared_ptr<Coord>> validMoves()
     {
         /**
          * 1) Check if piece coresponding to curr is nullptr

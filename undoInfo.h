@@ -7,6 +7,7 @@
 
 // move struct
 struct UndoInfo {
+    bool enPassant = false;
     Coord start; // needs default constructor
     Coord end; // needs default constructor
     State status;
