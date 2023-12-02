@@ -1,7 +1,6 @@
 #include "cell.h"
 #include "coord.h"
 #include "enums.h"
-
 #include <memory>
 #include <utility>
 
@@ -82,7 +81,7 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
     }
     else
     { // performs undo
-
+        // undo for enpassant
         // write information from UndoInfo => undoInfo is now not usable (cannot stack undos)
         dest.setPiece(c.getPiece());
         dest.getPiece()->setPos(dest.getCoordinate());
@@ -99,6 +98,17 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
 
     // updatingDisplayObservers happens in board.move() since display should only be updated
     // assumming the move is valid!!!!
+}
+
+void Cell::enPassantUndo(Cell &dest, Cell &passantedCell, UndoInfo *undoInfo, State *state)
+{
+    dest.setPiece(this->getPiece());
+    dest.getPiece()->setPos(dest.getCoordinate());
+    this->setPiece(nullptr);
+    passantedCell.setPiece(undoInfo->originalEndPiece);
+    passantedCell.getPiece()->setAlive(true);
+    dest.getPiece()->decrementMoveCounter();
+    undoInfo->enPassant = false;
 }
 
 SubscriptionType Cell::subType()
