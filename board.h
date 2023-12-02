@@ -37,6 +37,7 @@ class Board
         // move pieces back to original
         theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()],
                                                            &undoInfo);
+        theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
     }
 
     // fields
@@ -153,6 +154,8 @@ class Board
             cerr << "ERROR: Board.h => void placePiece(...) => invalid Colour" << endl;
             // maybe throw exception
         }
+
+        theBoard[coord.x()][coord.y()]->notifyDisplayObservers(*theBoard[0][0]);
     }
 
     // sets up default chess board by calling placePiece(...)
@@ -334,6 +337,7 @@ class Board
         theBoard[capturedPiece.x()][capturedPiece.y()]->setPiece(nullptr);
         theBoard[capturedPiece.x()][capturedPiece.y()]->notifyDisplayObservers(*theBoard[0][0]);
         theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+
         return true;
     }
 
@@ -393,8 +397,10 @@ class Board
 
   public:
     // **** CASTLE
-    bool move(Coord curr, Coord dest)
+    bool move(Coord curr, Coord dest, bool checkMateType = true)
     {
+        bool wasChecked = status == State::Check ? true : false;
+        bool stateUpdated = false;
 
         if (!isPossibleMove(curr, dest))
             return false;
@@ -483,6 +489,11 @@ class Board
             // update display observers
             theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
 
+            // block check into check
+            if (wasChecked && !stateUpdated) {
+                status = State::Normal;
+            }
+
             return true;
         }
 
@@ -534,6 +545,7 @@ class Board
 
                     isWhiteMove = !isWhiteMove;
                     if (isPossibleMove(dest, targetCell->getCoordinate())) {
+                        stateUpdated = true;
                         status = State::Check; // the move caused an actual check
                         cerr << "CHECK!!! LLLL" << endl;
                     }
@@ -552,15 +564,54 @@ class Board
 
         // update undoInfo (occurs in notify)
 
+        // checks for discovered checks
+        if (isWhiteMove && !stateUpdated) {
+            isWhiteMove = !isWhiteMove;
+            for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
+                if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate())) {
+                    status = State::Check;
+                    stateUpdated = true;
+                    cerr << "Discovered CHECK!!!" << endl;
+                    break;
+                }
+            }
+            isWhiteMove = !isWhiteMove;
+        } else if (!stateUpdated) {
+            isWhiteMove = !isWhiteMove;
+            for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
+                if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate())) {
+                    status = State::Check;
+                    stateUpdated = true;
+                    cerr << "Discovered CHECK!!!" << endl;
+                    break;
+                }
+            }
+            isWhiteMove = !isWhiteMove;
+        }
+        
+        if (checkMateType)   {
+            if (status == State::Check) { // check for possible checkmate
+                if (validMoves().size() == 0) {
+                    stateUpdated = true;
+                    status = State::Checkmate;
+                } 
+            } else { // check for possible stalemate
+                if (validMoves().size() == 0) {
+                    stateUpdated = true;
+                    status = State::Stalement;
+                }
+            }
+        }
 
-        // TODO!!!!!
-        if (status == State::Check) { // check for possible checkmate
-
-        } else { // check for possible stalemate
-
+        // block check into check
+        if (wasChecked && !stateUpdated) {
+            status = State::Normal;
         }
 
 
+        /**
+         * UPON SUCCESSFUL MOVE, remove original cell from pieces attacking king
+        */
         return true;
     }
 
@@ -572,6 +623,7 @@ class Board
         Colour c = isWhiteMove ? Colour::White : Colour::Black;
         if (c == Colour::White)
         {
+            if (!(whiteKing->getCoordinate() == Coord{4, 0})) return false;
             if (whiteKing->getPiece()->getMoveCounter() != 0)
                 return false; // king has moved
             if (!theBoard[7][0]->getPiece())
@@ -604,6 +656,7 @@ class Board
         }
         else
         {
+            if (!(blackKing->getCoordinate() == Coord{4, 7})) return false;
             if (blackKing->getPiece()->getMoveCounter() != 0)
                 return false; // king has moved
             if (!theBoard[7][7]->getPiece())
@@ -644,6 +697,7 @@ class Board
         Colour c = isWhiteMove ? Colour::White : Colour::Black;
         if (c == Colour::White)
         {
+            if (!(whiteKing->getCoordinate() == Coord{4, 0})) return false;
             if (whiteKing->getPiece()->getMoveCounter() != 0)
                 return false; // king has moved
             if (!theBoard[0][0]->getPiece())
@@ -676,6 +730,7 @@ class Board
         }
         else
         {
+            if (!(whiteKing->getCoordinate() == Coord{4, 7})) return false;
             if (blackKing->getPiece()->getMoveCounter() != 0)
                 return false; // king has moved
             if (!theBoard[0][7]->getPiece())
@@ -743,23 +798,64 @@ class Board
     }
 
   public:
-    // checks if Cell is on the table and cell is not allied piece
-    std::vector<std::shared_ptr<Coord>> validMoves()
+    State getState() { return status;}
+
+    // returns all the possible moves the current player can make
+    std::vector<std::vector<Coord>> validMoves()
     {
+        // format {{Coord {}, Coord{}}, ...,{Coord {}, Coord{}}}
+
+        // generate all possible Moves: Only checks out of bounds, and if we land on allied piece
+        vector<vector<Coord>> allValidMoves;
+        if (isWhiteMove) {
+            for (size_t i = 0; i < whitePieces.size(); ++i) {
+                if (whitePieces[i]->getAlive()) {
+                    vector<vector<Coord>> piecePossibleMoves = whitePieces[i]->possibleMoves();
+                    for (size_t r = 0; r < piecePossibleMoves.size(); ++r) {
+                        for (size_t c = 0; c < piecePossibleMoves[r].size(); ++c) {
+                            vector<Coord> pair = {whitePieces[i]->getPos(), piecePossibleMoves[r][c]};
+                            allValidMoves.emplace_back(pair);
+                            cout << "L";
+                        }
+                    }
+                }
+            }
+
+        } else { // black's move
+            for (size_t i = 0; i < blackPieces.size(); ++i) {
+                if (blackPieces[i]->getAlive()) {
+                    vector<vector<Coord>> piecePossibleMoves = blackPieces[i]->possibleMoves();
+                    for (size_t r = 0; r < piecePossibleMoves.size(); ++r) {
+                        for (size_t c = 0; c < piecePossibleMoves[r].size(); ++c) {
+                            vector<Coord> pair = {blackPieces[i]->getPos(), piecePossibleMoves[r][c]};
+                            allValidMoves.emplace_back(pair);
+                            cout << "L";
+                        }
+                    }
+                }
+            }
+        }
+
+        // Run through allValidMoves and check if that move isPossibleMove(...)
+        for (auto it = allValidMoves.begin(); it != allValidMoves.end();) {
+            //*it is a vector<Coord> with 2 elements
+            if (!isPossibleMove((*it)[0], (*it)[1])) allValidMoves.erase(it);
+            else ++it;
+        }
+
         /**
-         * 1) Check if piece coresponding to curr is nullptr
-         * 2) If not, Call possibleMoves for the piece on cell curr
-         *      a) return a vector<vector<coords>>
-         * 3) For each path loop from small to large and add to vec<cell> and check
-         * for blocking b) vector<Cell*> checkPathBlock(Coord curr, Coord dest (each
-         * coord in the vector), length, PieceType) 4) Take the vector<Cell*> and
-         * combine with all paths
-         */
-        vector<shared_ptr<Cell>> possibleMovesFromCurr;
-        auto currCellPtr = theBoard[curr.x()][curr.y()];
-        vector<vector<Coord>> possibleMovesUnfiltered = currCellPtr->getPiece()->possibleMoves();
-        vector<shared_ptr<Cell>> errorremover;
-        return errorremover; // wtf is this
+         * Now all the moves are possible, only thing left to check if it leaves us in an invalid state
+        */
+        for (auto it = allValidMoves.begin(); it != allValidMoves.end();) {
+            if (!move((*it)[0], (*it)[1], false)) { 
+                allValidMoves.erase(it);
+            } else {
+                undo();
+                ++it;
+            }
+        }
+
+        return allValidMoves;
     }
 
   private:

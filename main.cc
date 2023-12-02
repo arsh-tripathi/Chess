@@ -11,6 +11,7 @@ int main(void)
     Board b;
     // ask for players types possibly here
     b.setupDefaultBoard();
+
     cout << "Board was setup" << endl;
     std::cout << b;
     // harness begins here
@@ -70,6 +71,13 @@ int main(void)
             cout << "Invalid command, please enter a valid command" << endl;
         }
         cout << b;
+        if (b.getState() == State::Checkmate) {
+            cout << "CHECKMATE!!! GAME OVER!!!" << endl;
+            return 0;
+        } else if (b.getState() == State::Stalement) {
+            cout << "STALEMENT!!! BOZO!!" << endl;
+            return 0;
+        }
         if (b.isWhiteTurn())
         {
             cout << "It is White's turn" << endl;
