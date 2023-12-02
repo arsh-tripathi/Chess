@@ -441,10 +441,15 @@ class Board
             Colour c = isWhiteMove ? Colour::Black : Colour::White;
             isWhiteMove = !isWhiteMove;
 
+            // get the piece on the destination sqaure to handle capturing into a check
+            Piece *tmpPiece = theBoard[dest.x()][dest.y()]->getPiece();
+            // set the destination piece to a nullptr
+            theBoard[dest.x()][dest.y()]->setPiece(nullptr);
             if (c == Colour::Black) { // call isPossibleMove for all alive black pieces to dest
                 for (size_t i = 0; i < blackPieces.size(); ++i) {
                     if (isPossibleMove(blackPieces[i]->getPos(), dest)) {
                         isWhiteMove = !isWhiteMove;
+                        theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
                         return false;
                     }
                 }
@@ -452,11 +457,12 @@ class Board
                 for (size_t i = 0; i < whitePieces.size(); ++i) {
                     if (isPossibleMove(whitePieces[i]->getPos(), dest)) {
                         isWhiteMove = !isWhiteMove;
+                        theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
                         return false;
                     }
                 }
             }
-
+            theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
             // make the move
             theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
             // update pieces attacking king
@@ -558,9 +564,11 @@ class Board
         return true;
     }
 
-    // !!!! cannot short castle
+    //  short castle
     bool shortCastle()
-    {
+    {   
+        if (status == State::Check) return false; // cannot castle when in check
+
         Colour c = isWhiteMove ? Colour::White : Colour::Black;
         if (c == Colour::White)
         {
@@ -574,17 +582,130 @@ class Board
                 return false; // rook has moved
             if (theBoard[6][0]->getPiece() || theBoard[5][0]->getPiece())
                 return false; // pieces block castle
+            
+            if (!move(Coord {4, 0}, Coord{5, 0})) return false; // invalid first move
+            isWhiteMove = !isWhiteMove;
+            // if first castle king move is valid, check second move
+            if (!move(Coord{5,0}, Coord{6,0})) {
+                undo(); // undo first move
+                return false;
+            }
+
+            // both moves are valid, move rook over update counter
+            theBoard[5][0]->setPiece(theBoard[7][0]->getPiece());
+            theBoard[7][0]->setPiece(nullptr);
+            theBoard[5][0]->getPiece()->setPos(Coord{5, 0});
+            theBoard[5][0]->getPiece()->incrementMoveCounter();
+            theBoard[6][0]->getPiece()->decrementMoveCounter();
+
+            // update display
+            theBoard[7][0]->notifyDisplayObservers(*theBoard[5][0]);
+
         }
         else
         {
+            if (blackKing->getPiece()->getMoveCounter() != 0)
+                return false; // king has moved
+            if (!theBoard[7][7]->getPiece())
+                return false; // there is no piece at the required location
+            if (theBoard[7][7]->getPiece()->getPieceType() != PieceType::Rook)
+                return false; // Owen made me do this
+            if (theBoard[7][7]->getPiece()->getMoveCounter() != 0)
+                return false; // rook has moved
+            if (theBoard[6][7]->getPiece() || theBoard[5][7]->getPiece())
+                return false; // pieces block castle
+            
+            if (!move(Coord {4, 7}, Coord{5, 7})) return false; // invalid first move
+            isWhiteMove = !isWhiteMove;
+            // if first castle king move is valid, check second move
+            if (!move(Coord{5,7}, Coord{6,7})) {
+                undo(); // undo first move
+                return false;
+            }
+
+            // both moves are valid, move rook over update counter
+            theBoard[5][7]->setPiece(theBoard[7][7]->getPiece());
+            theBoard[7][7]->setPiece(nullptr);
+            theBoard[5][7]->getPiece()->setPos(Coord{5, 7});
+            theBoard[5][7]->getPiece()->incrementMoveCounter();
+            theBoard[6][7]->getPiece()->decrementMoveCounter();
+
+            // update display
+            theBoard[7][7]->notifyDisplayObservers(*theBoard[5][7]);
         }
-        return false;
+        return true;
     }
 
     // !!!! cannot short castle
     bool longCastle()
     {
-        return false;
+        if (status == State::Check) return false; // cannot castle when in check
+
+        Colour c = isWhiteMove ? Colour::White : Colour::Black;
+        if (c == Colour::White)
+        {
+            if (whiteKing->getPiece()->getMoveCounter() != 0)
+                return false; // king has moved
+            if (!theBoard[0][0]->getPiece())
+                return false; // there is no piece at the required location
+            if (theBoard[0][0]->getPiece()->getPieceType() != PieceType::Rook)
+                return false; // Owen made me do this
+            if (theBoard[0][0]->getPiece()->getMoveCounter() != 0)
+                return false; // rook has moved
+            if (theBoard[1][0]->getPiece() || theBoard[2][0]->getPiece() || theBoard[3][0]->getPiece())
+                return false; // pieces block castle
+            
+            if (!move(Coord {4, 0}, Coord{3, 0})) return false; // invalid first move
+            isWhiteMove = !isWhiteMove;
+            // if first castle king move is valid, check second move
+            if (!move(Coord{3,0}, Coord{2,0})) {
+                undo(); // undo first move
+                return false;
+            }
+
+            // both moves are valid, move rook over update counter
+            theBoard[3][0]->setPiece(theBoard[0][0]->getPiece());
+            theBoard[0][0]->setPiece(nullptr);
+            theBoard[3][0]->getPiece()->setPos(Coord{3, 0});
+            theBoard[3][0]->getPiece()->incrementMoveCounter();
+            theBoard[2][0]->getPiece()->decrementMoveCounter();
+
+            // update display
+            theBoard[0][0]->notifyDisplayObservers(*theBoard[3][0]);
+
+        }
+        else
+        {
+            if (blackKing->getPiece()->getMoveCounter() != 0)
+                return false; // king has moved
+            if (!theBoard[0][7]->getPiece())
+                return false; // there is no piece at the required location
+            if (theBoard[0][7]->getPiece()->getPieceType() != PieceType::Rook)
+                return false; // Owen made me do this
+            if (theBoard[0][7]->getPiece()->getMoveCounter() != 0)
+                return false; // rook has moved
+            if (theBoard[1][7]->getPiece() || theBoard[2][7]->getPiece() || theBoard[3][7]->getPiece())
+                return false; // pieces block castle
+            
+            if (!move(Coord {4, 7}, Coord{3, 7})) return false; // invalid first move
+            isWhiteMove = !isWhiteMove;
+            // if first castle king move is valid, check second move
+            if (!move(Coord{3,7}, Coord{2,7})) {
+                undo(); // undo first move
+                return false;
+            }
+
+            // both moves are valid, move rook over update counter
+            theBoard[3][7]->setPiece(theBoard[0][7]->getPiece());
+            theBoard[0][7]->setPiece(nullptr);
+            theBoard[3][7]->getPiece()->setPos(Coord{3, 7});
+            theBoard[3][7]->getPiece()->incrementMoveCounter();
+            theBoard[2][7]->getPiece()->decrementMoveCounter();
+
+            // update display
+            theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
+        }
+        return true;
     }
 
   private:
