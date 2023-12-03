@@ -10,7 +10,14 @@ int main(void)
     ofstream movesFile{"moves.txt"};
     Board b;
     // ask for players types possibly here
-    b.setupDefaultBoard();
+    // b.setupDefaultBoard();
+    b.placePiece(Colour::Black, Coord{5,7}, PieceType::King);
+    b.placePiece(Colour::White, Coord{4,0}, PieceType::King);
+    b.placePiece(Colour::White, Coord{7,0}, PieceType::Rook);
+    b.placePiece(Colour::White, Coord{4,1}, PieceType::Queen);
+    b.placePiece(Colour::White, Coord{6,1}, PieceType::Queen);
+    b.updatePiecesattackingKing(Colour::Black);
+    b.updatePiecesattackingKing(Colour::White);
 
     cout << "Board was setup" << endl;
     std::cout << b;
@@ -50,7 +57,7 @@ int main(void)
             if (t == 's')
             {
                 // short castle
-                if (!b.shortCastle())
+                if (!b.shortCastle(true))
                 {
                     cout << "Unable to castle" << endl;
                 }
@@ -58,7 +65,7 @@ int main(void)
             else if (t == 'l')
             {
                 // long castle
-                if (!b.longCastle())
+                if (!b.longCastle(true))
                 {
                     cout << "Unable to castle" << endl;
                 }
@@ -67,6 +74,7 @@ int main(void)
             {
                 cout << "Please enter a valid type of castle" << endl;
             }
+            break;
         default:
             cout << "Invalid command, please enter a valid command" << endl;
         }
