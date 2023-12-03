@@ -255,11 +255,6 @@ class Board
         return isWhiteMove;
     }
 
-    void toggleTurn()
-    {
-        isWhiteMove = !isWhiteMove;
-    }
-
     /**
      * Is possible moves checks the following:
      *  1) There is a piece of same colour player that is moving at curr
@@ -744,23 +739,23 @@ class Board
 
   public:
     // checks if Cell is on the table and cell is not allied piece
-    std::vector<std::shared_ptr<Cell>> possibleMoves(Coord curr)
-    {
-        /**
-         * 1) Check if piece coresponding to curr is nullptr
-         * 2) If not, Call possibleMoves for the piece on cell curr
-         *      a) return a vector<vector<coords>>
-         * 3) For each path loop from small to large and add to vec<cell> and check
-         * for blocking b) vector<Cell*> checkPathBlock(Coord curr, Coord dest (each
-         * coord in the vector), length, PieceType) 4) Take the vector<Cell*> and
-         * combine with all paths
-         */
-        vector<shared_ptr<Cell>> possibleMovesFromCurr;
-        auto currCellPtr = theBoard[curr.x()][curr.y()];
-        vector<vector<Coord>> possibleMovesUnfiltered = currCellPtr->getPiece()->possibleMoves();
-        vector<shared_ptr<Cell>> errorremover;
-        return errorremover; // wtf is this
-    }
+    // std::vector<std::shared_ptr<Cell>> validMoves()
+    // {
+    //     /**
+    //      * 1) Check if piece coresponding to curr is nullptr
+    //      * 2) If not, Call possibleMoves for the piece on cell curr
+    //      *      a) return a vector<vector<coords>>
+    //      * 3) For each path loop from small to large and add to vec<cell> and check
+    //      * for blocking b) vector<Cell*> checkPathBlock(Coord curr, Coord dest (each
+    //      * coord in the vector), length, PieceType) 4) Take the vector<Cell*> and
+    //      * combine with all paths
+    //      */
+    //     vector<shared_ptr<Cell>> possibleMovesFromCurr;
+    //     auto currCellPtr = theBoard[curr.x()][curr.y()];
+    //     vector<vector<Coord>> possibleMovesUnfiltered = currCellPtr->getPiece()->possibleMoves();
+    //     vector<shared_ptr<Cell>> errorremover;
+    //     return errorremover; // wtf is this
+    // }
 
   private:
     // returns non-blocked cells in the given path
@@ -868,10 +863,27 @@ std::ostream &operator<<(std::ostream &out, const Board &b)
 
     file << endl;
 
-    // file << "///// Turn /////" << endl;
-    // file << "isWhiteMove is: " << b.isWhiteMove << endl;
+// DEAD WHITE PIECES
+    file << "///// GRAVEYARD /////" << endl;
+    file << "Dead white pieces: " << endl;
+    for (size_t i = 0; i < b.whitePieces.size(); ++i) {
+        if(!(b.whitePieces[i]->getAlive())) {
+            file << b.whitePieces[i]->getPieceType();
+            file << " that died at: ";
+            file << b.whitePieces[i]->getPos().x() << "," << b.whitePieces[i]->getPos().y() << endl;
+        }
+    }
+    file << endl;
+    file << "Dead black pieces: " << endl;
+    for (size_t i = 0; i < b.blackPieces.size(); ++i) {
+        if(!(b.blackPieces[i]->getAlive())) {
+            file << b.blackPieces[i]->getPieceType();
+            file << " that died at: ";
+            file << b.blackPieces[i]->getPos().x() << "," << b.blackPieces[i]->getPos().y() << endl;
+        }
+    }
 
-    // file << endl;
+    file << endl;
 
     file << "///// piecesAttackingWhiteKing /////" << endl;
     for (size_t i = 0; i  < b.piecesAttackingWhiteKing.size(); ++i) {

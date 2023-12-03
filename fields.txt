@@ -1,14 +1,26 @@
 ///// undoInfo /////
-start: 6,4
-end: 4,6
+start: 3,5
+end: 4,4
 status: Check
-original end piece: bishop
+original end piece: pawn
 
 ///// State /////
 state is: Check
 
+///// GRAVEYARD /////
+Dead white pieces: 
+pawn that died at: 4,4
+pawn that died at: 4,2
+bishop that died at: 6,4
+queen that died at: 3,5
+
+Dead black pieces: 
+pawn that died at: 3,5
+pawn that died at: 4,4
+queen that died at: 4,2
+
 ///// piecesAttackingWhiteKing /////
+4,2
 
 ///// piecesAttackingBlackKing /////
-4,3
 
