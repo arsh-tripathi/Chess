@@ -8,7 +8,8 @@ using namespace std;
 
 
 bool isValidSquare(string square) { // takes e7 or h4
-    char x, y;
+    char x;
+    int y;
     string dump;
     istringstream sq{square};
     sq >> x;
@@ -26,10 +27,40 @@ bool isValidSquare(string square) { // takes e7 or h4
 
 Coord convertToCoord(string square) { // takes e7 or h4
     int x, y;
+    char alpha;
     istringstream sq{square};
-    sq >> x;
+    sq >> alpha;
+
+    switch(alpha) {
+        case 'a':
+            x = 0;
+            break;
+        case 'b':
+            x = 1;
+            break;
+        case 'c':
+            x = 2;
+            break;
+        case 'd':
+            x = 3;
+            break;
+        case 'e':
+            x = 4;
+            break;
+        case 'f':
+            x = 5;
+            break;
+        case 'g':
+            x = 6;
+            break;
+        case 'h':
+            x = 7;
+            break;
+    }
+
     sq >> y;
-    return Coord{x, y};
+
+    return Coord{x, y - 1}; // to just for -1 difference
 }
 
 //  TO DO :
@@ -44,9 +75,6 @@ Coord convertToCoord(string square) { // takes e7 or h4
 
 // RESIGN??????? -> handled during game 
 
-
-
-
 int main(void) {
     ofstream movesFile{"moves.txt"};
     Board b;
@@ -58,149 +86,134 @@ int main(void) {
     while(cin >> cmd) { 
 
         if(cmd == "setup") { // SET UP
-            string setUpLine;     // set up cmd
-            bool done = false;
-            custom true;
-            while(getline(cin, setUpLine) && !done) {
+            cout << "Entering setup mode." << endl;
+            string setUpLine;     // actual cmd
+
+            custom = true;
+            string firstCmd; // either + 
+            while(cin >> firstCmd) {
+                getline(cin, setUpLine);
                 istringstream in{setUpLine};
 
-                string firstCmd;
-                in >> firstCmd;
-
-                switch(firstCmd) {
-                    case "done":
-                        done = true;
-                        break;
-                    case "+":
-                        string piece, square;
-                        in >> piece >> square;
-
-                        switch (piece) {
-                            case "K": // white king
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::White, convertToCoord(square), PieceType::King);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "P": // white pawn
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::White, convertToCoord(square), PieceType::Pawn);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "Q": // white queen
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::White, convertToCoord(square), PieceType::Queen);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;                                
-                            case "N": // white knight
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::White, convertToCoord(square), PieceType::Knight);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "R": // white rook
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::White, convertToCoord(square), PieceType::Rook);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "B": // white bishop
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::White, convertToCoord(square), PieceType::Bishop);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "k": // black king
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::Black, convertToCoord(square), PieceType::King);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "p": // black pawn
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::Black, convertToCoord(square), PieceType::Pawn);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "q": // white queen
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::Black, convertToCoord(square), PieceType::Queen);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;                                
-                            case "n": // white knight
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::Black, convertToCoord(square), PieceType::Knight);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "r": // white rook
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::Black, convertToCoord(square), PieceType::Rook);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            case "b": // white bishop
-                                if(isValidSquare(square)) {
-                                    b.placePiece(Colour::Black, convertToCoord(square), PieceType::Bishop);
-                                } else {
-                                    cerr << "Invalid Square" << endl;                                    
-                                }
-                                break;
-                            default:
-                                cerr << "Invalid Piece" << endl;  
+                if(firstCmd == "done") {
+                    
+                    // ADD CHECKS IN HERE FOR:
+                    // - one black/white king
+                    // no pawns first/last row of board
+                    // neither king is in check
+                    break;                   
+                } else if (firstCmd == "+") {
+                    string piece, square;
+                    in >> piece >> square;
+                    if(piece == "K") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::White, convertToCoord(square), PieceType::King);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }                        
+                    } else if (piece == "P") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Pawn);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
                         }
-                        break;
+                    } else if (piece == "Q") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Queen);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "N") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Knight);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "R") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Rook);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "B") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Bishop);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "k") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::King);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "p") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Pawn);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "q") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Queen);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "n") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Knight);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "r") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Rook);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else if (piece == "b") {
+                        if(isValidSquare(square)) {
+                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Bishop);
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        }
+                    } else {
+                        cerr << "Invalid Piece" << endl;                        
+                    }
 
-                    case "-":
-                        // DO 
-                        break;
-                    case "=":
-                        // DO need isWhiteMove setter in board.h
-                        break;
-                    default :
-                        cerr << "Invalid Set Up Command" << endl;                                                    
+                } else if (firstCmd == "-") {
 
+                    // NEED REMOVE METHOD IN BOARD
+                    cout << "hi im in -" << endl;                    
+                } else if (firstCmd == "=") {
+                    
+                    // NEED ISWHITEMOVE GETTER IN BOARD
+                    cout << "hi im in =" << endl;                   
+                } else {
+                    cerr << "Invalid Set Up Command" << endl;                    
                 }
                 cout << b;
             }
-
         } else if (cmd == "game") { // GAME
+            string white, black;
+            cin >> white >> black; // need black/white player bulletproof input
+            // process 
+            if(!custom) {
+                b.setupDefaultBoard();
+            }
 
+            // fill in game below
+            cout << b;            
+
+            cout << " i am in game GOODBYE" << endl;
+        } else if (cmd == "quit") {
+            cout << "goodbye" << endl; // for testing  
+            break;
         } else { // NOT SET UP OR GAME
             cerr << "Please enter valid command" << endl;
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

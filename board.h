@@ -153,6 +153,7 @@ class Board
             cerr << "ERROR: Board.h => void placePiece(...) => invalid Colour" << endl;
             // maybe throw exception
         }
+        theBoard[coord.x()][coord.y()]->notifyDisplayObservers(*theBoard[0][0]);
     }
 
     // sets up default chess board by calling placePiece(...)
