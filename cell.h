@@ -32,6 +32,7 @@ class Cell : public Observer
 
     // calls move
     void notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state) override;
+    void enPassantUndo(Cell &dest, Cell &passantedCell, UndoInfo *undoInfo, State *state);
 
     SubscriptionType subType() override;
 

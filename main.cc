@@ -62,31 +62,20 @@ Coord convertToCoord(string square) { // takes e7 or h4
 
     return Coord{x, y - 1}; // to just for -1 difference
 }
-
-//  TO DO :
-
-// set up working as intended
-
-// set up to game switch as intended
-
-// set up default in case
-
-// make moves handle it
-
-// RESIGN??????? -> handled during game 
-
+ 
 int main(void) {
     ofstream movesFile{"moves.txt"};
     Board b;
     bool custom = false;
 
-    /// PLAYERS UP HERE
-    string cmd; // either set up or game something something
+
+
+    string cmd; // either set up, game something something, or quit
 
     while(cin >> cmd) { 
 
         if(cmd == "setup") { // SET UP
-            cout << "Entering setup mode." << endl;
+            cout << "Entering Setup Mode..." << endl;
             string setUpLine;     // actual cmd
 
             custom = true;
@@ -101,6 +90,7 @@ int main(void) {
                     // - one black/white king
                     // no pawns first/last row of board
                     // neither king is in check
+                    cout << "Exiting Setup Mode..." << endl;
                     break;                   
                 } else if (firstCmd == "+") {
                     string piece, square;
@@ -180,40 +170,177 @@ int main(void) {
                     } else {
                         cerr << "Invalid Piece" << endl;                        
                     }
-
+                    cout << b;
                 } else if (firstCmd == "-") {
-
-                    // NEED REMOVE METHOD IN BOARD
-                    cout << "hi im in -" << endl;                    
+                    string square;
+                    in >> square;
+                    if(isValidSquare(square)) {
+                        b.removePiece(convertToCoord(square));
+                    } else {
+                        cerr << "Invalid Square" << endl;                                    
+                    } 
+                    cout << b;                 
                 } else if (firstCmd == "=") {
-                    
-                    // NEED ISWHITEMOVE GETTER IN BOARD
-                    cout << "hi im in =" << endl;                   
+                    string colour;
+                    in >> colour;
+                    if(colour == "White" || colour == "white") {
+                        b.setWhiteTurn(true);
+                        cout << "White Will Go Next" << endl;
+
+                    } else if(colour == "Black" || colour == "black") {
+                        b.setWhiteTurn(false);
+                        cout << "Black Will Go Next" << endl;
+
+                    } else {
+                        cerr << "Invalid Colour" << endl;                         
+                    }            
                 } else {
                     cerr << "Invalid Set Up Command" << endl;                    
                 }
-                cout << b;
             }
         } else if (cmd == "game") { // GAME
             string white, black;
-            cin >> white >> black; // need black/white player bulletproof input
+            cin >> white >> black; // for now both human and unused
+
+            // set up players objects and call below
+
             // process 
             if(!custom) {
                 b.setupDefaultBoard();
             }
+            cout << b;
+            // play actual game below
+            string gameLine;     // actual cmd
 
-            // fill in game below
-            cout << b;            
+            string firstCmd; // either resign or move 
+            while(cin >> firstCmd) { // (cin >> firstCmd && !(gameOver())) or something
+                getline(cin, gameLine);
+                istringstream in{gameLine};
 
-            cout << " i am in game GOODBYE" << endl;
+                if(firstCmd == "resign") {
+
+                    // resign and end game
+                    
+                } else if (firstCmd == "move") {
+                    string curr, dest, promo;
+                    in >> curr >> dest >> promo;
+                    if(curr.empty()) {
+                        // normal computer move
+                        cout << "we make computer move" << endl;
+                    } else if (!(dest.empty()) && promo.empty()) {
+                        // normal human move
+
+                        // NOTE: need to handle castling in here
+
+                        if(isValidSquare(curr) && isValidSquare(dest)) {
+                            // make move
+                            if (!(b.move(convertToCoord(curr), convertToCoord(dest)))) {
+                                cerr << "Invalid Move" << endl;                                
+                            }
+                        } else {
+                            cerr << "Invalid Squares" << endl;
+                        }                       
+                    } else { 
+                        // human pawn promotion move
+                        // NOTE: need to handle pawn promotion in here
+
+                        cout << "we make human pawn promotion move" << endl; 
+                    }
+                    cout << b;
+                } else {
+                    cerr << "Invalid Game Command" << endl;                    
+                }           
+            }
         } else if (cmd == "quit") {
-            cout << "goodbye" << endl; // for testing  
+            // for testing 
             break;
-        } else { // NOT SET UP OR GAME
-            cerr << "Please enter valid command" << endl;
+        } else { // didn't enter setup game or quit
+            cerr << "Enter Valid Command" << endl;
         }
     }
+
+
+    // display final score here before programs ends
 }
+
+
+
+
+// OLD HARNESS
+
+//     // ask for players types possibly here
+//     b.setupDefaultBoard();
+//     cout << "Board was setup" << endl;
+//     std::cout << b;
+//     // harness begins here
+//     char cmd;
+//     while (cin >> cmd)
+//     {
+//         string line;
+//         getline(cin, line);
+//         istringstream in{line};
+
+//         switch (cmd)
+//         {
+//         case 'q':
+//             cout << "Exiting the game" << endl;
+//             return 0;
+//         case 'm':
+//             int w, x, y, z;
+//             in >> w >> x >> y >> z;
+//             movesFile << cmd << " " << w << " " << x << " " << y << " " << z << " " << endl;
+//             if (in.fail())
+//             {
+//                 cout << "Please provide valid coordinates for the move" << endl;
+//             }
+//             if (!(b.move(Coord{w, x}, Coord{y, z})))
+//             {
+//                 cout << "Invalid move. kindly make a move again" << endl;
+//             }
+//             break;
+//         case 'c':
+//             char t;
+//             in >> t;
+//             if (in.fail())
+//             {
+//                 cout << "Please enter a valid type of castle" << endl;
+//             }
+//             if (t == 's')
+//             {
+//                 // short castle
+//                 if (!b.shortCastle())
+//                 {
+//                     cout << "Unable to castle" << endl;
+//                 }
+//             }
+//             else if (t == 'l')
+//             {
+//                 // long castle
+//                 if (!b.longCastle())
+//                 {
+//                     cout << "Unable to castle" << endl;
+//                 }
+//             }
+//             else 
+//             {
+//                 cout << "Please enter a valid type of castle" << endl;
+//             }
+//         default:
+//             cout << "Invalid command, please enter a valid command" << endl;
+//         }
+//         cout << b;
+//         if (b.isWhiteTurn())
+//         {
+//             cout << "It is White's turn" << endl;
+//         }
+//         else
+//         {
+//             cout << "It is Black's turn" << endl;
+//         }
+//     }
+// }
+
+
 
 
 
@@ -381,92 +508,3 @@ int main(void) {
             //     // else {
             //     //     cout << "It is Black's turn" << endl;
             //     // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// OLD HARNESS
-
-//     // ask for players types possibly here
-//     b.setupDefaultBoard();
-//     cout << "Board was setup" << endl;
-//     std::cout << b;
-//     // harness begins here
-//     char cmd;
-//     while (cin >> cmd)
-//     {
-//         string line;
-//         getline(cin, line);
-//         istringstream in{line};
-
-//         switch (cmd)
-//         {
-//         case 'q':
-//             cout << "Exiting the game" << endl;
-//             return 0;
-//         case 'm':
-//             int w, x, y, z;
-//             in >> w >> x >> y >> z;
-//             movesFile << cmd << " " << w << " " << x << " " << y << " " << z << " " << endl;
-//             if (in.fail())
-//             {
-//                 cout << "Please provide valid coordinates for the move" << endl;
-//             }
-//             if (!(b.move(Coord{w, x}, Coord{y, z})))
-//             {
-//                 cout << "Invalid move. kindly make a move again" << endl;
-//             }
-//             break;
-//         case 'c':
-//             char t;
-//             in >> t;
-//             if (in.fail())
-//             {
-//                 cout << "Please enter a valid type of castle" << endl;
-//             }
-//             if (t == 's')
-//             {
-//                 // short castle
-//                 if (!b.shortCastle())
-//                 {
-//                     cout << "Unable to castle" << endl;
-//                 }
-//             }
-//             else if (t == 'l')
-//             {
-//                 // long castle
-//                 if (!b.longCastle())
-//                 {
-//                     cout << "Unable to castle" << endl;
-//                 }
-//             }
-//             else 
-//             {
-//                 cout << "Please enter a valid type of castle" << endl;
-//             }
-//         default:
-//             cout << "Invalid command, please enter a valid command" << endl;
-//         }
-//         cout << b;
-//         if (b.isWhiteTurn())
-//         {
-//             cout << "It is White's turn" << endl;
-//         }
-//         else
-//         {
-//             cout << "It is Black's turn" << endl;
-//         }
-//     }
-// }

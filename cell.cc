@@ -1,7 +1,6 @@
 #include "cell.h"
 #include "coord.h"
 #include "enums.h"
-
 #include <memory>
 #include <utility>
 
@@ -66,7 +65,8 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
         undoInfo->status = *state;
         undoInfo->originalEndPiece = dest.getPiece();
         // set piece to die
-        if (dest.getPiece()) dest.getPiece()->setAlive(false);
+        if (dest.getPiece())
+            dest.getPiece()->setAlive(false);
 
         // moves piece pointer at c to dest
         dest.setPiece(c.getPiece());
@@ -81,13 +81,14 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
     }
     else
     { // performs undo
-
+        // undo for enpassant
         // write information from UndoInfo => undoInfo is now not usable (cannot stack undos)
         dest.setPiece(c.getPiece());
         dest.getPiece()->setPos(dest.getCoordinate());
         c.setPiece(undoInfo->originalEndPiece);
         // set piece to alive
-        if (c.getPiece()) c.getPiece()->setAlive(true);
+        if (c.getPiece())
+            c.getPiece()->setAlive(true);
 
         // decrement pieces move counter at c
         dest.getPiece()->decrementMoveCounter();
@@ -97,6 +98,17 @@ void Cell::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state)
 
     // updatingDisplayObservers happens in board.move() since display should only be updated
     // assumming the move is valid!!!!
+}
+
+void Cell::enPassantUndo(Cell &dest, Cell &passantedCell, UndoInfo *undoInfo, State *state)
+{
+    dest.setPiece(this->getPiece());
+    dest.getPiece()->setPos(dest.getCoordinate());
+    this->setPiece(nullptr);
+    passantedCell.setPiece(undoInfo->originalEndPiece);
+    passantedCell.getPiece()->setAlive(true);
+    dest.getPiece()->decrementMoveCounter();
+    undoInfo->enPassant = false;
 }
 
 SubscriptionType Cell::subType()
