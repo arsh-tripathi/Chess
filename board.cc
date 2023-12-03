@@ -36,6 +36,14 @@ void Board::undo()
     // update white/black turn
     isWhiteMove = !isWhiteMove;
     // move pieces back to original
+    if (theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece()->getPieceType() == PieceType::King) {
+        Colour col = theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece()->getColour();
+        if (col == Colour::White) {
+            whiteKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
+        } else {
+            blackKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
+        }
+    }
     if (undoInfo.enPassant)
     {
         int difference = isWhiteMove ? -1 : 1;
@@ -46,8 +54,7 @@ void Board::undo()
             *theBoard[undoInfo.end.x()][undoInfo.end.x()]);
         theBoard[undoInfo.end.x()][undoInfo.end.y() + difference]->notifyDisplayObservers(*theBoard[0][0]);
     }
-    theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()],
-                                                        &undoInfo);
+    theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()], &undoInfo);
     theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
 }
 
@@ -98,19 +105,19 @@ int Board::getEvalScore() {
 
 int pieceTypeToPoints(PieceType pt) {
     switch (pt) {
-            case PieceType::Queen:
-                return 10;
-            case PieceType::Rook:
-                return 6;
-            case PieceType::Knight:
-                return 4;
-            case PieceType::Bishop:
-                return 4;
-            case PieceType::Pawn:
-                return 2;
-            default:
-                return 0;
-        }
+        case PieceType::Queen:
+            return 10;
+        case PieceType::Rook:
+            return 6;
+        case PieceType::Knight:
+            return 4;
+        case PieceType::Bishop:
+            return 4;
+        case PieceType::Pawn:
+            return 2;
+        default:
+            return 0;
+    }
 }
 
 void Board::updateEvalPromotion() {
@@ -384,6 +391,8 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 
     // get the piece on the destination sqaure to handle capturing into a check
     Piece *tmpPiece = theBoard[dest.x()][dest.y()]->getPiece();
+    Piece *king = theBoard[curr.x()][curr.y()]->getPiece();
+    theBoard[curr.x()][curr.y()]->setPiece(nullptr);
     // set the destination piece to a nullptr
     theBoard[dest.x()][dest.y()]->setPiece(nullptr);
     if (c == Colour::Black)
@@ -394,6 +403,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
             {
                 isWhiteMove = !isWhiteMove;
                 theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
+                theBoard[curr.x()][curr.y()]->setPiece(king);
                 return false;
             }
         }
@@ -406,11 +416,14 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
             {
                 isWhiteMove = !isWhiteMove;
                 theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
+                theBoard[curr.x()][curr.y()]->setPiece(king);
                 return false;
             }
         }
     }
     theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
+    theBoard[curr.x()][curr.y()]->setPiece(king);
+
     // make the move & update eval score
     undoInfo.previousEvalScore = evalScore;
     theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
@@ -618,18 +631,26 @@ void Board::checkForCheck(bool checkMateType) {
     }
 }
 void Board::checkForMate(bool checkMateType) {
+    bool og1 = stateUpdated;
+    bool og2 = wasChecked;
+    State og3 = status;
     if (!checkMateType) return;
     if (status == State::Check) { // check for possible checkmate
         if (validMoves().size() == 0) {
             stateUpdated = true;
             status = State::Checkmate;
+            return;
         } 
     } else { // check for possible stalemate
         if (validMoves().size() == 0) {
             stateUpdated = true;
             status = State::Stalement;
+            return;
         }
     }
+    stateUpdated = og1;
+    wasChecked = og2;
+    status = og3;
 }
 
 bool Board::move(Coord curr, Coord dest, bool checkMateType)
@@ -897,6 +918,7 @@ bool Board::longCastle(bool checkMateType)
     }
     updatePiecesattackingKing(Colour::Black);
     updatePiecesattackingKing(Colour::White);
+
 
     // update Evaluation Score
     Colour col = isWhiteMove ? Colour::Black : Colour::White;

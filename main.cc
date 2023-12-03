@@ -10,14 +10,14 @@ int main(void)
     ofstream movesFile{"moves.txt"};
     Board b;
     // ask for players types possibly here
-    // b.setupDefaultBoard();
-    b.placePiece(Colour::Black, Coord{5,7}, PieceType::King);
-    b.placePiece(Colour::White, Coord{4,0}, PieceType::King);
-    b.placePiece(Colour::White, Coord{7,0}, PieceType::Rook);
-    b.placePiece(Colour::White, Coord{4,1}, PieceType::Queen);
-    b.placePiece(Colour::White, Coord{6,1}, PieceType::Queen);
-    b.updatePiecesattackingKing(Colour::Black);
-    b.updatePiecesattackingKing(Colour::White);
+    b.setupDefaultBoard();
+    // b.placePiece(Colour::Black, Coord{5,7}, PieceType::King);
+    // b.placePiece(Colour::White, Coord{4,0}, PieceType::King);
+    // b.placePiece(Colour::White, Coord{7,0}, PieceType::Rook);
+    // b.placePiece(Colour::White, Coord{4,1}, PieceType::Queen);
+    // b.placePiece(Colour::White, Coord{6,1}, PieceType::Queen);
+    // b.updatePiecesattackingKing(Colour::Black);
+    // b.updatePiecesattackingKing(Colour::White);
 
     cout << "Board was setup" << endl;
     std::cout << b;
