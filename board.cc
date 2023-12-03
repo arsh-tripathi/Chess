@@ -168,8 +168,6 @@ void Board::updateEvalScore(Colour col, Piece* piece, State state) {
     if (piece != nullptr) {
         score += pieceTypeToPoints(piece->getPieceType());
     }
-    if (state == State::Check) score += 1;
-    if (state == State::Checkmate) score += 100;
     if (col == Colour::White) evalScore += score;
     else evalScore -= score; 
 }
@@ -662,9 +660,13 @@ void Board::checkForMate(bool checkMateType) {
     State og3 = status;
     if (!checkMateType) return;
     if (status == State::Check) { // check for possible checkmate
+        if (isWhiteMove) evalScore -= 1;
+        else evalScore += 1;
         if (validMoves().size() == 0) {
             stateUpdated = true;
             status = State::Checkmate;
+            if (isWhiteMove) evalScore -= 100;
+            else evalScore += 100;
             return;
         } 
     } else { // check for possible stalemate
