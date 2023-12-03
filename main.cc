@@ -1,11 +1,12 @@
 #include "board.h"
 #include "coord.h"
+#include "player.h"
+#include "human.h"
 #include <iostream>
 #include <sstream>
 #include <string>
 
 using namespace std;
-
 
 bool isValidSquare(string square) { // takes e7 or h4
     char x;
@@ -62,205 +63,237 @@ Coord convertToCoord(string square) { // takes e7 or h4
 
     return Coord{x, y - 1}; // to just for -1 difference
 }
- 
+
 int main(void) {
-    ofstream movesFile{"moves.txt"};
-    Board b;
-    bool custom = false;
 
 
+    float whitePlayer = 0;
+    float blackPlayer = 0;
 
-    string cmd; // either set up, game something something, or quit
+    while(!cin.eof()) { // large game loop
+        Board b; // start fresh with new board
+        bool custom = false;
 
-    while(cin >> cmd) { 
+        string cmd; // either set up, game something something, or quit
 
-        if(cmd == "setup") { // SET UP
-            cout << "Entering Setup Mode..." << endl;
-            string setUpLine;     // actual cmd
+        while(cin >> cmd) { 
 
-            custom = true;
-            string firstCmd; // either + 
-            while(cin >> firstCmd) {
-                getline(cin, setUpLine);
-                istringstream in{setUpLine};
+            if(cmd == "setup") { // SET UP
+                cout << "Entering Setup Mode..." << endl;
+                string setUpLine;     // actual cmd
 
-                if(firstCmd == "done") {
-                    
-                    // ADD CHECKS IN HERE FOR:
-                    // - one black/white king
-                    // no pawns first/last row of board
-                    // neither king is in check
-                    cout << "Exiting Setup Mode..." << endl;
-                    break;                   
-                } else if (firstCmd == "+") {
-                    string piece, square;
-                    in >> piece >> square;
-                    if(piece == "K") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::White, convertToCoord(square), PieceType::King);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }                        
-                    } else if (piece == "P") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Pawn);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "Q") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Queen);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "N") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Knight);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "R") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Rook);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "B") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::White, convertToCoord(square), PieceType::Bishop);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "k") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::King);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "p") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Pawn);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "q") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Queen);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "n") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Knight);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "r") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Rook);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else if (piece == "b") {
-                        if(isValidSquare(square)) {
-                            b.placePiece(Colour::Black, convertToCoord(square), PieceType::Bishop);
-                        } else {
-                            cerr << "Invalid Square" << endl;                                    
-                        }
-                    } else {
-                        cerr << "Invalid Piece" << endl;                        
-                    }
-                    cout << b;
-                } else if (firstCmd == "-") {
-                    string square;
-                    in >> square;
-                    if(isValidSquare(square)) {
-                        b.removePiece(convertToCoord(square));
-                    } else {
-                        cerr << "Invalid Square" << endl;                                    
-                    } 
-                    cout << b;                 
-                } else if (firstCmd == "=") {
-                    string colour;
-                    in >> colour;
-                    if(colour == "White" || colour == "white") {
-                        b.setWhiteTurn(true);
-                        cout << "White Will Go Next" << endl;
+                custom = true;
+                string firstCmd; // either + 
+                while(cin >> firstCmd) {
+                    getline(cin, setUpLine);
+                    istringstream in{setUpLine};
 
-                    } else if(colour == "Black" || colour == "black") {
-                        b.setWhiteTurn(false);
-                        cout << "Black Will Go Next" << endl;
-
-                    } else {
-                        cerr << "Invalid Colour" << endl;                         
-                    }            
-                } else {
-                    cerr << "Invalid Set Up Command" << endl;                    
-                }
-            }
-        } else if (cmd == "game") { // GAME
-            string white, black;
-            cin >> white >> black; // for now both human and unused
-
-            // set up players objects and call below
-
-            // process 
-            if(!custom) {
-                b.setupDefaultBoard();
-            }
-            cout << b;
-            // play actual game below
-            string gameLine;     // actual cmd
-
-            string firstCmd; // either resign or move 
-            while(cin >> firstCmd) { // (cin >> firstCmd && !(gameOver())) or something
-                getline(cin, gameLine);
-                istringstream in{gameLine};
-
-                if(firstCmd == "resign") {
-
-                    // resign and end game
-                    
-                } else if (firstCmd == "move") {
-                    string curr, dest, promo;
-                    in >> curr >> dest >> promo;
-                    if(curr.empty()) {
-                        // normal computer move
-                        cout << "we make computer move" << endl;
-                    } else if (!(dest.empty()) && promo.empty()) {
-                        // normal human move
-
-                        // NOTE: need to handle castling in here
-
-                        if(isValidSquare(curr) && isValidSquare(dest)) {
-                            // make move
-                            if (!(b.move(convertToCoord(curr), convertToCoord(dest)))) {
-                                cerr << "Invalid Move" << endl;                                
+                    if(firstCmd == "done") {
+                        
+                        // ADD CHECKS IN HERE FOR: *TODO*
+                        // - one black/white king
+                        // no pawns first/last row of board
+                        // neither king is in check
+                        cout << "Exiting Setup Mode..." << endl;
+                        break;                   
+                    } else if (firstCmd == "+") {
+                        string piece, square;
+                        in >> piece >> square;
+                        if(piece == "K") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::White, convertToCoord(square), PieceType::King);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }                        
+                        } else if (piece == "P") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::White, convertToCoord(square), PieceType::Pawn);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "Q") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::White, convertToCoord(square), PieceType::Queen);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "N") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::White, convertToCoord(square), PieceType::Knight);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "R") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::White, convertToCoord(square), PieceType::Rook);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "B") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::White, convertToCoord(square), PieceType::Bishop);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "k") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::Black, convertToCoord(square), PieceType::King);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "p") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::Black, convertToCoord(square), PieceType::Pawn);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "q") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::Black, convertToCoord(square), PieceType::Queen);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "n") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::Black, convertToCoord(square), PieceType::Knight);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "r") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::Black, convertToCoord(square), PieceType::Rook);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
+                            }
+                        } else if (piece == "b") {
+                            if(isValidSquare(square)) {
+                                b.placePiece(Colour::Black, convertToCoord(square), PieceType::Bishop);
+                            } else {
+                                cerr << "Invalid Square" << endl;                                    
                             }
                         } else {
-                            cerr << "Invalid Squares" << endl;
-                        }                       
-                    } else { 
-                        // human pawn promotion move
-                        // NOTE: need to handle pawn promotion in here
+                            cerr << "Invalid Piece" << endl;                        
+                        }
+                        cout << b;
+                    } else if (firstCmd == "-") {
+                        string square;
+                        in >> square;
+                        if(isValidSquare(square)) {
+                            b.removePiece(convertToCoord(square));
+                        } else {
+                            cerr << "Invalid Square" << endl;                                    
+                        } 
+                        cout << b;                 
+                    } else if (firstCmd == "=") {
+                        string colour;
+                        in >> colour;
+                        if(colour == "White" || colour == "white") {
+                            b.setWhiteTurn(true);
+                            cout << "White Will Go Next" << endl;
 
-                        cout << "we make human pawn promotion move" << endl; 
+                        } else if(colour == "Black" || colour == "black") {
+                            b.setWhiteTurn(false);
+                            cout << "Black Will Go Next" << endl;
+
+                        } else {
+                            cerr << "Invalid Colour" << endl;                         
+                        }            
+                    } else {
+                        cerr << "Invalid Set Up Command" << endl;                    
                     }
-                    cout << b;
-                } else {
-                    cerr << "Invalid Game Command" << endl;                    
-                }           
+                }
+            } else if (cmd == "game") { // GAME
+                string white, black;
+                cin >> white >> black; // for now both human and unused
+
+                // set up players
+                Human p1{Colour::White};
+                Human p2{Colour::Black};
+                // set up players
+
+                if(!custom) {
+                    b.setupDefaultBoard();
+                }
+
+                p1.setBoard(&b);
+                p2.setBoard(&b);
+
+                cout << b;
+                
+                string firstCmd; // either resign or move 
+                while(cin >> firstCmd) {
+
+                    if(firstCmd == "resign") {
+
+                        if(b.isWhiteTurn()) {
+                            p1.resign(); // doesn't change isWhiteMove
+                        } else {
+                            p2.resign();
+                        }
+                    } else if (firstCmd == "move") {
+                        
+                        if(b.isWhiteTurn()) {
+                            p1.move(); // *TODO*
+
+                        } else {
+                            p2.move(); // *TODO*
+
+                        }
+                    } else {
+                        cerr << "Invalid Game Command" << endl;                    
+                    }
+
+                    if(b.getState() == State::Check) {
+
+                        if(b.isWhiteTurn()) {
+
+                            cout << "White is in Check" << endl;    
+                        } else {
+
+                            cout << "Black is in Check" << endl; 
+                        }
+                    }
+                    if(b.getState() == State::Checkmate) {
+
+                        if(b.isWhiteTurn()) {
+
+                            cout << "Checkmate! Black wins!" << endl;    
+                        } else {
+                            
+                            cout << "Checkmate! White wins!" << endl; 
+                        }
+
+                        break; // takes us all the way out to while(true)
+                    }
+                    if(b.getState() == State::Resign) { 
+
+                        if(b.isWhiteTurn()) {
+                            blackPlayer = blackPlayer + 1;
+                            cout << "Black wins!" << endl;    
+                        } else {
+                            whitePlayer = whitePlayer + 1;
+                            cout << "White wins!" << endl; 
+                        }
+
+                        break;
+                    }
+                    if(b.getState() == State::Stalement) {
+                        whitePlayer = whitePlayer + 0.5;
+                        blackPlayer = blackPlayer + 0.5;
+                        cout << "Stalemate!" << endl;                    
+                        break;
+                    }
+                }
+                break;
+
+            } else if (cmd == "quit") {
+                // for testing 
+                break;
+            } else { // didn't enter setup game or quit
+                cerr << "Enter Valid Command" << endl;
             }
-        } else if (cmd == "quit") {
-            // for testing 
-            break;
-        } else { // didn't enter setup game or quit
-            cerr << "Enter Valid Command" << endl;
         }
     }
-
-
-    // display final score here before programs ends
 }
 
 
@@ -339,6 +372,89 @@ int main(void) {
 //         }
 //     }
 // }
+
+
+// player move logic
+
+            // string gameLine;     // actual cmd
+
+            // string firstCmd; // either resign or move 
+            // while(cin >> firstCmd) { // (cin >> firstCmd && !(gameOver())) or something
+            //     getline(cin, gameLine);
+            //     istringstream in{gameLine};
+
+            //     if(firstCmd == "resign") {
+
+            //         // resign and end game
+                    
+            //     } else if (firstCmd == "move") {
+            //         string curr, dest, promo;
+            //         in >> curr >> dest >> promo;
+            //         if(curr.empty()) {
+            //             // normal computer move
+            //             cout << "we make computer move" << endl;
+            //         } else if (!(dest.empty()) && promo.empty()) {
+            //             // normal human move
+
+            //             if(isValidSquare(curr) && isValidSquare(dest)) {
+                            
+            //                 // check for castle
+            //                 if(convertToCoord(curr) == Coord{4, 0}) {
+            //                     if(convertToCoord(dest) == Coord{6, 0}) {
+            //                         if(b.shortCastle(true)){
+            //                             // checkmate check
+            //                             continue;
+            //                         }
+            //                     } else if(convertToCoord(dest) == Coord{2, 0}) {
+            //                         if (b.longCastle(true)) {
+            //                             // checkmate check
+            //                             continue;
+            //                         }
+            //                     }
+            //                 }
+
+            //                 // check for castle
+            //                 if(convertToCoord(curr) == Coord{4, 7}) {
+            //                     if(convertToCoord(dest) == Coord{6, 7}) {
+            //                         if(b.shortCastle(true)){
+            //                             // checkmate check
+            //                             continue;
+            //                         }
+            //                     } else if(convertToCoord(dest) == Coord{2, 7}) {
+            //                         if (b.longCastle(true)) {
+            //                             // checkmate check
+            //                             continue;
+            //                         }
+            //                     }
+
+            //                 }
+
+            //                 // make move
+            //                 if (!(b.move(convertToCoord(curr), convertToCoord(dest)))) {
+            //                     cerr << "Invalid Move" << endl;                                
+            //                 }
+            //             } else {
+            //                 cerr << "Invalid Squares" << endl;
+            //             }                       
+            //         } else { 
+            //             // human pawn promotion move
+            //             // NOTE: need to handle pawn promotion in here
+
+            //             cout << "we make human pawn promotion move" << endl; 
+            //         }
+            //         cout << b;
+                    // } else {
+                    //     cerr << "Invalid Game Command" << endl;                    
+                    // }           
+
+
+
+
+
+
+
+
+
 
 
 

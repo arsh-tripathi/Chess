@@ -72,6 +72,9 @@ class Board
 
 
     friend std::ostream &operator<<(std::ostream &out, const Board &b);
+
+    friend class Player;
+    friend class Human;
     
   public:
     // ctor/dtor
