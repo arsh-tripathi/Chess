@@ -78,22 +78,35 @@ Board::~Board()
 { // unclear which elements need to be destructed
 }
 
-Board::Board(Board &other) 
+Board::Board(const Board &other) : isWhiteMove{other.isWhiteMove}, status{other.status}, evalScore{0}, td{make_shared<TextDisplay>(*(other.td))}
 { 
     // fields
     // no idea how to do undoInfo because of piece*
 
     // setup 
+    // initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
+    for (int r = 0; r < boardSize; ++r) {
+        vector<shared_ptr<Cell>> row;
+        for (int c = 0; c < boardSize; ++c)
+        {
+            row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td));
+        }
+        theBoard.emplace_back(row);
+    }
 
     // setup pieces
     for (size_t i = 0; i < other.whitePieces.size(); ++i) {
         placePiece(other.whitePieces[i]->getColour(), other.whitePieces[i]->getPos(), other.whitePieces[i]->getPieceType());
+        if (other.whitePieces[i]->getPieceType() == PieceType::King) whiteKing = getCell(other.whitePieces[i]->getPos()); // setup white king position
     }
-
     for (size_t i = 0; i < other.blackPieces.size(); ++i) {
         placePiece(other.blackPieces[i]->getColour(), other.blackPieces[i]->getPos(), other.blackPieces[i]->getPieceType());
+        if (other.blackPieces[i]->getPieceType() == PieceType::King) blackKing = getCell(other.blackPieces[i]->getPos()); // setup black king position
     }
 
+    // setup piecesAttackingWhiteKing and BlackKing
+    updatePiecesattackingKing(Colour::White);
+    updatePiecesattackingKing(Colour::Black);
 }
 Board::Board(Board &&other)
 { // shouldn't need for now  since we have undo() . may
