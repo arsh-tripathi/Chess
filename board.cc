@@ -11,6 +11,8 @@
 #include "textdisplay.h"
 #include "undoInfo.h"
 
+#include "testUtil.h"
+
 #include <fstream>
 #include <memory>
 #include <utility>
@@ -26,7 +28,9 @@ Piece * Board::getPiece(Coord c) {return getCell(c)->getPiece();}
 // undo resets the chessboard back to its state one move ago, as stored in
 // undoInfo
 void Board::undo()
-{
+{   
+    // update Evaluation Score !!! REVERSE EVAL SCORE
+    evalScore = undoInfo.previousEvalScore;
     // update status
     status = undoInfo.status;
     // update white/black turn
@@ -87,6 +91,56 @@ Board &Board::operator=(Board &&other)
 }
 
 // methods
+
+int Board::getEvalScore() {
+    return evalScore;
+}
+
+int pieceTypeToPoints(PieceType pt) {
+    switch (pt) {
+            case PieceType::Queen:
+                return 10;
+            case PieceType::Rook:
+                return 6;
+            case PieceType::Knight:
+                return 4;
+            case PieceType::Bishop:
+                return 4;
+            case PieceType::Pawn:
+                return 2;
+            default:
+                return 0;
+        }
+}
+
+void Board::updateEvalPromotion() {
+    int score = 0;
+    for (size_t i = 0; i < whitePieces.size(); ++i) {
+        if (whitePieces[i]->getAlive()) {
+            score += pieceTypeToPoints(whitePieces[i]->getPieceType());
+        }
+    }
+    for (size_t i = 0; i < blackPieces.size(); ++i) {
+        if (blackPieces[i]->getAlive()) {
+            score -= pieceTypeToPoints(blackPieces[i]->getPieceType());
+        }
+    }
+    evalScore = score;
+}
+
+
+// updateEvalScore updates the evaluation based on the piece captured (if it is), checks, and checkmakes of the col player who moved
+void Board::updateEvalScore(Colour col, Piece* piece, State state) {
+    int score = 0;
+    if (piece != nullptr) {
+        score += pieceTypeToPoints(piece->getPieceType());
+    }
+    if (state == State::Check) score += 1;
+    if (state == State::Checkmate) score += 100;
+    if (col == Colour::White) evalScore += score;
+    else evalScore -= score; 
+}
+
 
 // creates pieces (adds to blackpieces or whitepieces) and places raw pointer
 // at cell
@@ -357,7 +411,8 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
         }
     }
     theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
-    // make the move
+    // make the move & update eval score
+    undoInfo.previousEvalScore = evalScore;
     theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
     // update pieces attacking king
     if (c == Colour::Black)
@@ -387,10 +442,24 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
     theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
     updatePiecesattackingKing(Colour::White);
     updatePiecesattackingKing(Colour::Black);
-    checkForCheck();
+
+    // update Evaluation Score
+    Colour col = isWhiteMove ? Colour::Black : Colour::White;
+    updateEvalScore(col, undoInfo.originalEndPiece, status); // checkForMate -> validMoves absolutely CUCKS evalScore
+
+    checkForCheck(checkMateType);
     checkForMate(checkMateType);
     if (wasChecked && !stateUpdated) status = State::Normal;
-
+    cout << "was checked: " << wasChecked << endl;
+    cout << "stateUpdated: " << stateUpdated << endl;
+    // update Evaluation Score
+    string s = "other";
+    if (status == State::Check) {
+        s = "check!";
+    } else if (status == State::Normal) {
+        s = "normal...";
+    }
+    if (checkMateType) cout << "Status: " <<  s << endl;
     return true;
 }
 
@@ -408,11 +477,12 @@ bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, boo
             undoInfo.end - undoInfo.start == Coord{0, -2}))
         return false; // last wasn't double jump
     // move the pawn
+    undoInfo.previousEvalScore = evalScore;
     theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
     isWhiteMove = !isWhiteMove;
     // check invalidity if invald undo and return false
-    updateState();
-    if (status == State::Invalid)
+    bool valid = updateState();
+    if (!valid)
     {
         undo(); // !!! fix undo
         cerr << "You entered into an invalid state from that ENPASSANT move" << endl;
@@ -426,21 +496,35 @@ bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, boo
     theBoard[capturedPiece.x()][capturedPiece.y()]->notifyDisplayObservers(*theBoard[0][0]);
     theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
 
-    updateCellObservers(curr, dest);
-    checkForCheck();
+    updateCellObservers(curr, dest, checkMateType);
+
+    // update Evaluation Score
+    Colour col = isWhiteMove ? Colour::Black : Colour::White;
+    updateEvalScore(col, undoInfo.originalEndPiece, status); // checkForMate -> validMoves absolutely CUCKS evalScore
+
+    checkForCheck(checkMateType);
     checkForMate(checkMateType);
     if (wasChecked && !stateUpdated) status = State::Normal;
+    // update Evaluation Score
+    string s = "other";
+    if (status == State::Check) {
+        s = "check!";
+    } else if (status == State::Normal) {
+        s = "normal...";
+    }
+    if (checkMateType) cout << "Status: " <<  s << endl;
     return true;
 }
 
 bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
 {
     // move the pawn
+    undoInfo.previousEvalScore = evalScore;
     theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
     isWhiteMove = !isWhiteMove;
     // check invalidity if invald undo and return false
-    updateState();
-    if (status == State::Invalid)
+    bool valid = updateState();
+    if (!valid)
     {
         undo(); // !!! fix undo
         cerr << "You entered into an invalid state from that PROMOTION move" << endl;
@@ -450,48 +534,65 @@ bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
     theBoard[dest.x()][dest.y()]->getPiece()->setAlive(false);
     theBoard[dest.x()][dest.y()]->setPiece(nullptr);
     PieceType pt;
-    bool notGotPiece = true;
-    while (notGotPiece)
-    {
-        cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
-        char piece;
-        if (cin >> piece)
+    if (checkMateType) {
+        bool notGotPiece = true;
+        while (notGotPiece)
         {
-            switch (piece)
+            cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
+            char piece;
+            if (cin >> piece)
             {
-            case 'R':
-                pt = PieceType::Rook;
-                notGotPiece = false;
-                break;
-            case 'N':
-                pt = PieceType::Knight;
-                notGotPiece = false;
-                break;
-            case 'B':
-                pt = PieceType::Bishop;
-                notGotPiece = false;
-                break;
-            case 'Q':
-                pt = PieceType::Queen;
-                notGotPiece = false;
-                break;
-            default:
-                cout << "Please enter a valid piece type to promote" << endl;
+                switch (piece)
+                {
+                case 'R':
+                    pt = PieceType::Rook;
+                    notGotPiece = false;
+                    break;
+                case 'N':
+                    pt = PieceType::Knight;
+                    notGotPiece = false;
+                    break;
+                case 'B':
+                    pt = PieceType::Bishop;
+                    notGotPiece = false;
+                    break;
+                case 'Q':
+                    pt = PieceType::Queen;
+                    notGotPiece = false;
+                    break;
+                default:
+                    cout << "Please enter a valid piece type to promote" << endl;
+                }
+                // remember colour is opposite of isWhiteMove
             }
-            // remember colour is opposite of isWhiteMove
         }
+    } else {
+        pt = PieceType::Pawn;
     }
     Colour col = isWhiteMove ? Colour::Black : Colour::White;
     placePiece(col, dest, pt);
     theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
-    updateCellObservers(curr, dest);
-    checkForCheck();
+    updateCellObservers(curr, dest, checkMateType);
+
+    // update Evaluation Score
+    updateEvalPromotion(); // checkForMate -> validMoves absolutely CUCKS evalScore
+
+    checkForCheck(checkMateType);
     checkForMate(checkMateType);
     if (wasChecked && !stateUpdated) status = State::Normal;
+    // update Evaluation Score
+    string s = "other";
+    if (status == State::Check) {
+        s = "check!";
+    } else if (status == State::Normal) {
+        s = "normal...";
+    }
+    if (checkMateType) cout << "Status: " <<  s << endl;
     return true;
 }
 
-void Board::checkForCheck() {
+void Board::checkForCheck(bool checkMateType) {
+    if (!checkMateType) return;
     if (isWhiteMove && !stateUpdated) {
         isWhiteMove = !isWhiteMove;
         for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
@@ -533,12 +634,11 @@ void Board::checkForMate(bool checkMateType) {
 
 bool Board::move(Coord curr, Coord dest, bool checkMateType)
 {
-    wasChecked = status == State::Check ? true : false;
+    if (checkMateType) wasChecked = status == State::Check ? true : false;
     stateUpdated = false;
     undoInfo.enPassant = false;
     Colour col = isWhiteMove? Colour::White: Colour::Black;
-    if (!isPossibleMove(curr, dest, col))
-        return false;
+    if (!isPossibleMove(curr, dest, col)) return false;
 
     // special handling for pawn moves
     if (theBoard[curr.x()][curr.y()]->getPiece()->getPieceType() == PieceType::Pawn)
@@ -565,13 +665,13 @@ bool Board::move(Coord curr, Coord dest, bool checkMateType)
     }
 
     // make the move
+    undoInfo.previousEvalScore = evalScore;
     theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
     isWhiteMove = !isWhiteMove;
 
-    updateState();
-
+    bool valid = updateState();
     // check the state
-    if (status == State::Invalid)
+    if (!valid)
     {
         undo(); // !!! fix undo
         cerr << "You entered into an invalid state from that move" << endl;
@@ -585,21 +685,35 @@ bool Board::move(Coord curr, Coord dest, bool checkMateType)
     // JUST POSSIBLE MOVES SHOULD MAYBE CHECK FOR BLOCK PATHS ASWELL SO KNOW IF
     // KING IS "ACTUALLY" UNDER ATTACK
 
-    updateCellObservers(curr, dest);
+    updateCellObservers(curr, dest, checkMateType); //update pieces attacking opponent pieces king (!!!!! IF CURRENT CELL IS ATTACKING KING, IT DOESN'T ACTUALLY DELETE THIS IS FINE BECAUSE ISPOSSIBLEMOVE ACCOUNTS FOR NULLPTR)
     // update display observers
     theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
 
     // update undoInfo (occurs in notify)
 
+    // update Evaluation Score
+    col = isWhiteMove ? Colour::Black : Colour::White;
+    updateEvalScore(col, undoInfo.originalEndPiece, status); // checkForMate -> validMoves absolutely CUCKS evalScore
     // checks for discovered checks
-    checkForCheck();
-    if (checkMateType) checkForMate(checkMateType);
+    checkForCheck(checkMateType);
+    checkForMate(checkMateType);
 
     // block check into check
-    if (wasChecked && !stateUpdated) status = State::Normal;
-    /**
-     * UPON SUCCESSFUL MOVE, remove original cell from pieces attacking king
-    */
+    if (wasChecked && !stateUpdated) {
+        cout << "HERRERERER!" << endl;
+        status = State::Normal;
+    }
+    
+    string s = "other";
+    if (status == State::Check) {
+        s = "check!";
+    } else if (status == State::Normal) {
+        s = "normal...";
+    }
+    if (checkMateType) cout << "Status: " <<  s << endl;
+    if (undoInfo.originalEndPiece != nullptr && checkMateType) {
+        cout << "THIS IS THE PIECE: " << pieceToStr(undoInfo.originalEndPiece->getPieceType()) << endl;
+    }
     return true;
 }
 
@@ -643,8 +757,8 @@ bool Board::shortCastle(bool checkMateType)
 
         // update display
         theBoard[7][0]->notifyDisplayObservers(*theBoard[5][0]);
-        updateCellObservers(Coord{4,0}, Coord{6,0});
-        updateCellObservers(Coord{7,0}, Coord{5,0});
+        updateCellObservers(Coord{4,0}, Coord{6,0}, checkMateType);
+        updateCellObservers(Coord{7,0}, Coord{5,0}, checkMateType);
     }
     else
     {
@@ -679,14 +793,26 @@ bool Board::shortCastle(bool checkMateType)
 
         // update display
         theBoard[7][7]->notifyDisplayObservers(*theBoard[5][7]);
-        updateCellObservers(Coord{4,7}, Coord{6,7});
-        updateCellObservers(Coord{7,7}, Coord{5,7});
+        updateCellObservers(Coord{4,7}, Coord{6,7}, checkMateType);
+        updateCellObservers(Coord{7,7}, Coord{5,7}, checkMateType);
     }
     updatePiecesattackingKing(Colour::Black);
     updatePiecesattackingKing(Colour::White);
-    checkForCheck();
+    // update Evaluation Score
+    Colour col = isWhiteMove ? Colour::Black : Colour::White;
+    updateEvalScore(col, undoInfo.originalEndPiece, status); // checkForMate -> validMoves absolutely CUCKS evalScore
+
+    checkForCheck(checkMateType);
     checkForMate(checkMateType);
     if (wasChecked && !stateUpdated) status = State::Normal;
+    // update Evaluation Score
+    string s = "other";
+    if (status == State::Check) {
+        s = "check!";
+    } else if (status == State::Normal) {
+        s = "normal...";
+    }
+    if (checkMateType) cout << "Status: " <<  s << endl;
     return true;
 }
 
@@ -730,8 +856,8 @@ bool Board::longCastle(bool checkMateType)
 
         // update display
         theBoard[0][0]->notifyDisplayObservers(*theBoard[3][0]);
-        updateCellObservers(Coord{4,0}, Coord{2,0});
-        updateCellObservers(Coord{0,0}, Coord{3,0});
+        updateCellObservers(Coord{4,0}, Coord{2,0}, checkMateType);
+        updateCellObservers(Coord{0,0}, Coord{3,0}, checkMateType);
     }
     else
     {
@@ -766,18 +892,31 @@ bool Board::longCastle(bool checkMateType)
 
         // update display
         theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
-        updateCellObservers(Coord{4,7}, Coord{2,7});
-        updateCellObservers(Coord{0,7}, Coord{3,7});
+        updateCellObservers(Coord{4,7}, Coord{2,7}, checkMateType);
+        updateCellObservers(Coord{0,7}, Coord{3,7}, checkMateType);
     }
     updatePiecesattackingKing(Colour::Black);
     updatePiecesattackingKing(Colour::White);
-    checkForCheck();
+
+    // update Evaluation Score
+    Colour col = isWhiteMove ? Colour::Black : Colour::White;
+    updateEvalScore(col, undoInfo.originalEndPiece, status); // checkForMate -> validMoves absolutely CUCKS evalScore
+
+    checkForCheck(checkMateType);
     checkForMate(checkMateType);
     if (wasChecked && !stateUpdated) status = State::Normal;
+    // update Evaluation Score
+    string s = "other";
+    if (status == State::Check) {
+        s = "check!";
+    } else if (status == State::Normal) {
+        s = "normal...";
+    }
+    if (checkMateType) cout << "Status: " <<  s << endl;
     return true;
 }
 
-void Board::updateState()
+bool Board::updateState()
 {
     if (isWhiteMove)
     {
@@ -786,8 +925,7 @@ void Board::updateState()
         {
             if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate(), Colour::White))
             {
-                status = State::Invalid;
-                return;
+                return false;
             }
         }
     }
@@ -798,14 +936,14 @@ void Board::updateState()
         {
             if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate(), Colour::Black))
             {
-                status = State::Invalid;
-                return;
+                return false;
             }
         }
     }
+    return true;
 }
 
-void Board::updateCellObservers(Coord curr, Coord dest) {
+void Board::updateCellObservers(Coord curr, Coord dest, bool checkMateType) {
     theBoard[curr.x()][curr.y()]->detachAllCellObservers();
     theBoard[dest.x()][dest.y()]->detachAllCellObservers();
     vector<vector<Coord>> newCellObs = theBoard[dest.x()][dest.y()]->getPiece()->possibleMoves();
@@ -825,7 +963,7 @@ void Board::updateCellObservers(Coord curr, Coord dest) {
             {
                 Colour col2 = !isWhiteMove? Colour::White: Colour::Black; // this king is under attack
                 isWhiteMove = !isWhiteMove;
-                if (isPossibleMove(dest, targetCell->getCoordinate(), col2))
+                if (isPossibleMove(dest, targetCell->getCoordinate(), col2) && checkMateType)
                 {
                     stateUpdated = true;
                     status = State::Check; // the move caused an actual check
@@ -833,12 +971,9 @@ void Board::updateCellObservers(Coord curr, Coord dest) {
                 }
                 isWhiteMove = !isWhiteMove;
 
-                if (col == Colour::White)
-                    piecesAttackingWhiteKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
-                else
-                    piecesAttackingBlackKing.emplace_back(theBoard[dest.x()][dest.y()]); // changed
+                if (col == Colour::White) piecesAttackingWhiteKing.emplace_back(theBoard[dest.x()][dest.y()]);
+                else piecesAttackingBlackKing.emplace_back(theBoard[dest.x()][dest.y()]);
             }
-            // toggleTurn();
             theBoard[dest.x()][dest.y()]->attach(targetCell); // this is fine
         }
     }
@@ -927,6 +1062,20 @@ bool Board::singlePathBlockCheck(Coord curr, Coord dest)
         }
     }
     return false;
+}
+
+
+
+void Board::printActualBoard() {
+    for (int r = 0; r < boardSize; ++r) {
+        for (int c = 0; c < boardSize; ++c) {
+
+            if (theBoard[r][c]->getPiece()) cout << pieceToStr(theBoard[r][c]->getPiece()->getPieceType());
+            else cout << "_";
+            cout << " " ;
+        }
+        cout << endl;
+    }
 }
 
 

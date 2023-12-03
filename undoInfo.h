@@ -14,6 +14,7 @@ struct UndoInfo
     Coord end;   // needs default constructor
     State status;
     Piece *originalEndPiece;
+    int previousEvalScore = 0;
 
     UndoInfo() : start{Coord{-1, -1}}, end{Coord{-1, -1}}, status{State::Normal}, originalEndPiece{nullptr}
     {

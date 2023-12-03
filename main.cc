@@ -78,7 +78,11 @@ int main(void)
         default:
             cout << "Invalid command, please enter a valid command" << endl;
         }
+        cout << "Actual Board" << endl;
+        b.printActualBoard();
+        cout << "TextDisplay" << endl;
         cout << b;
+        cout << "Eval Score: " << b.getEvalScore() << endl;
         if (b.getState() == State::Checkmate) {
             cout << "CHECKMATE!!! GAME OVER!!!" << endl;
             return 0;

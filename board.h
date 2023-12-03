@@ -39,7 +39,7 @@ class Board
 
     bool isWhiteMove = true;
     State status = State::Normal; // normal, check, checkmate, statemate, resign, invalid
-    float evalScore = 0;          // white piece points - black piece points
+    int evalScore = 0;          // white piece points - black piece points
 
     bool wasChecked =  false;
     bool stateUpdated = false;
@@ -56,16 +56,21 @@ class Board
     bool enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, bool checkMateType);
     bool promotion(Coord curr, Coord dest, bool checkMateType);
 
-    void updateState();
+    bool updateState();
 
-    void checkForCheck();
+    void checkForCheck(bool checkMateType);
     void checkForMate(bool checkMateType);
 
-    void updateCellObservers(Coord curr, Coord dest);
+    void updateCellObservers(Coord curr, Coord dest, bool checkMateType);
     // returns non-blocked cells in the given path
     std::vector<std::shared_ptr<Cell>> pathBlock(Coord curr);
     // returns true if the path from curr to dest is not blocked
     bool singlePathBlockCheck(Coord curr, Coord dest);
+
+    void updateEvalScore(Colour col, Piece* piece, State state);
+    void updateEvalPromotion();
+
+
     friend std::ostream &operator<<(std::ostream &out, const Board &b);
     
   public:
@@ -109,8 +114,13 @@ class Board
     // !!!! cannot short castle
     bool longCastle(bool checkMateType);
     State getState();
+    int getEvalScore();
     // returns all the possible moves the current player can make
     std::vector<std::vector<Coord>> validMoves();
+
+
+    // TESTING
+    void printActualBoard();
 };
 
 // overload for testing

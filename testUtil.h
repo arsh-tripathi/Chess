@@ -16,18 +16,18 @@ std::string colourToStr(Colour colour) {
 std::string pieceToStr(PieceType pt) {
     switch (pt) {
         case PieceType::King:
-            return "king";
+            return "K";
         case PieceType::Queen:
-            return "queen";
+            return "Q";
         case PieceType::Pawn:
-            return "pawn";
+            return "P";
         case PieceType::Rook:
-            return "rook";
+            return "R";
         case PieceType::Knight:
-            return "knight";
+            return "N";
         case PieceType::Bishop:
-            return "bishop";
+            return "B";
         default:
-            return "None";
+            return "_";
     }
 }
