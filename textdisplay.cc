@@ -45,6 +45,19 @@ char TextDisplay::cellToChar(Cell &c)
     return pieceChar;
 }
 
+TextDisplay::TextDisplay(const TextDisplay& other) {
+    for (int r = 0; r < boardSize; ++r)
+    {
+        vector<char> row;
+        for (int c = 0; c < boardSize; ++c)
+        {
+            row.emplace_back(other.theDisplay[r][c]);
+        }
+        theDisplay.emplace_back(row);
+    }
+}
+
+
 TextDisplay::TextDisplay()
 {
     for (int r = 0; r < boardSize; ++r)
