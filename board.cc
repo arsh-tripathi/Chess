@@ -78,9 +78,22 @@ Board::~Board()
 { // unclear which elements need to be destructed
 }
 
-Board::Board(Board &other)
-{ // shouldn't need for now since we have undo() . may
-    // need for AI
+Board::Board(Board &other) 
+{ 
+    // fields
+    // no idea how to do undoInfo because of piece*
+
+    // setup 
+
+    // setup pieces
+    for (size_t i = 0; i < other.whitePieces.size(); ++i) {
+        placePiece(other.whitePieces[i]->getColour(), other.whitePieces[i]->getPos(), other.whitePieces[i]->getPieceType());
+    }
+
+    for (size_t i = 0; i < other.blackPieces.size(); ++i) {
+        placePiece(other.blackPieces[i]->getColour(), other.blackPieces[i]->getPos(), other.blackPieces[i]->getPieceType());
+    }
+
 }
 Board::Board(Board &&other)
 { // shouldn't need for now  since we have undo() . may
