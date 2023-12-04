@@ -374,6 +374,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 				isWhiteMove = !isWhiteMove;
 				theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
 				theBoard[curr.x()][curr.y()]->setPiece(king);
+				cerr << "King moved into check by xy: " << blackPieces[i]->getPos().x() << blackPieces[i]->getPos().y() << endl;
 				return false;
 			}
 		}
@@ -383,6 +384,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 				isWhiteMove = !isWhiteMove;
 				theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
 				theBoard[curr.x()][curr.y()]->setPiece(king);
+				cerr << "White King moved into check by xy: " << blackPieces[i]->getPos().x() << blackPieces[i]->getPos().y() << endl;
 				return false;
 			}
 		}
@@ -804,7 +806,7 @@ bool Board::longCastle(bool checkMateType) {
 		updateCellObservers(Coord{4, 0}, Coord{2, 0}, checkMateType);
 		updateCellObservers(Coord{0, 0}, Coord{3, 0}, checkMateType);
 	} else {
-		if (!(whiteKing->getCoordinate() == Coord{4, 7})) return false;
+		if (!(blackKing->getCoordinate() == Coord{4, 7})) return false;
 		if (blackKing->getPiece()->getMoveCounter() != 0) return false;					  // king has moved
 		if (!theBoard[0][7]->getPiece()) return false;									  // there is no piece at the required location
 		if (theBoard[0][7]->getPiece()->getPieceType() != PieceType::Rook) return false;  // Owen made me do this
