@@ -56,19 +56,21 @@ void Board::undo()
     }
     theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()], &undoInfo);
     theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
+    theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyGraphicsObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
 }
 
 
 // !!! Remember to add/initialize graphics display once everything is complete
-Board::Board() : td{make_shared<TextDisplay>()}
+Board::Board() : td{make_shared<TextDisplay>()}, xw{Xwindow{700, 700}}
 {
+    gd = make_shared<GraphicsDisplay>(xw, td);
     // initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
     for (int r = 0; r < boardSize; ++r)
     {
         vector<shared_ptr<Cell>> row;
         for (int c = 0; c < boardSize; ++c)
         {
-            row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td));
+            row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td, gd));
         }
         theBoard.emplace_back(row);
     }
@@ -78,8 +80,9 @@ Board::~Board()
 { // unclear which elements need to be destructed
 }
 
-Board::Board(const Board &other) : isWhiteMove{other.isWhiteMove}, status{other.status}, evalScore{0}, td{make_shared<TextDisplay>(*(other.td))}
+Board::Board(const Board &other) : isWhiteMove{other.isWhiteMove}, status{other.status}, evalScore{0}, xw{Xwindow{}}, td{make_shared<TextDisplay>(*(other.td))}
 { 
+    gd = make_shared<GraphicsDisplay>(xw, td);
     // fields
     // no idea how to do undoInfo because of piece*
 
@@ -89,7 +92,7 @@ Board::Board(const Board &other) : isWhiteMove{other.isWhiteMove}, status{other.
         vector<shared_ptr<Cell>> row;
         for (int c = 0; c < boardSize; ++c)
         {
-            row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td));
+            row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td, gd));
         }
         theBoard.emplace_back(row);
     }
@@ -235,7 +238,7 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
     }
 
     theBoard[coord.x()][coord.y()]->notifyDisplayObservers(*theBoard[0][0]);
-
+    theBoard[coord.x()][coord.y()]->notifyGraphicsObservers(*theBoard[0][0]);
 }
 
 // sets up default chess board by calling placePiece(...)
@@ -330,6 +333,8 @@ void Board::setupDefaultBoard()
     {
         td->notify(*(theBoard[i][7]), *(theBoard[i][0]));
         td->notify(*(theBoard[i][6]), *(theBoard[i][1]));
+        gd->notify(*(theBoard[i][7]), *(theBoard[i][0]));
+        gd->notify(*(theBoard[i][6]), *(theBoard[i][1]));
     }
 
     updatePiecesattackingKing(Colour::Black);
@@ -476,7 +481,8 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
     }
 
     // update display observers
-    theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
     updatePiecesattackingKing(Colour::White);
     updatePiecesattackingKing(Colour::Black);
 
@@ -530,8 +536,11 @@ bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, boo
     theBoard[capturedPiece.x()][capturedPiece.y()]->getPiece()->setAlive(false);
     undoInfo.originalEndPiece = theBoard[capturedPiece.x()][capturedPiece.y()]->getPiece();
     theBoard[capturedPiece.x()][capturedPiece.y()]->setPiece(nullptr);
-    theBoard[capturedPiece.x()][capturedPiece.y()]->notifyDisplayObservers(*theBoard[0][0]);
-    theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[capturedPiece.x()][capturedPiece.y()]->notifyDisplayObservers(*theBoard[0][0]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+
+    if (checkMateType) theBoard[capturedPiece.x()][capturedPiece.y()]->notifyGraphicsObservers(*theBoard[0][0]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
 
     updateCellObservers(curr, dest, checkMateType);
 
@@ -608,7 +617,9 @@ bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
     }
     Colour col = isWhiteMove ? Colour::Black : Colour::White;
     placePiece(col, dest, pt);
-    theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
+
     updateCellObservers(curr, dest, checkMateType);
 
     // update Evaluation Score
@@ -736,7 +747,9 @@ bool Board::move(Coord curr, Coord dest, bool checkMateType)
 
     updateCellObservers(curr, dest, checkMateType); //update pieces attacking opponent pieces king (!!!!! IF CURRENT CELL IS ATTACKING KING, IT DOESN'T ACTUALLY DELETE THIS IS FINE BECAUSE ISPOSSIBLEMOVE ACCOUNTS FOR NULLPTR)
     // update display observers
-    theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
+
 
     // update undoInfo (occurs in notify)
 
@@ -805,7 +818,9 @@ bool Board::shortCastle(bool checkMateType)
         theBoard[6][0]->getPiece()->decrementMoveCounter();
 
         // update display
-        theBoard[7][0]->notifyDisplayObservers(*theBoard[5][0]);
+        if (checkMateType) theBoard[7][0]->notifyDisplayObservers(*theBoard[5][0]);
+        if (checkMateType) theBoard[7][0]->notifyGraphicsObservers(*theBoard[5][0]);
+
         updateCellObservers(Coord{4,0}, Coord{6,0}, checkMateType);
         updateCellObservers(Coord{7,0}, Coord{5,0}, checkMateType);
     }
@@ -841,7 +856,9 @@ bool Board::shortCastle(bool checkMateType)
         theBoard[6][7]->getPiece()->decrementMoveCounter();
 
         // update display
-        theBoard[7][7]->notifyDisplayObservers(*theBoard[5][7]);
+        if (checkMateType) theBoard[7][7]->notifyDisplayObservers(*theBoard[5][7]);
+        if (checkMateType) theBoard[7][7]->notifyGraphicsObservers(*theBoard[5][7]);
+
         updateCellObservers(Coord{4,7}, Coord{6,7}, checkMateType);
         updateCellObservers(Coord{7,7}, Coord{5,7}, checkMateType);
     }
@@ -904,13 +921,15 @@ bool Board::longCastle(bool checkMateType)
         theBoard[2][0]->getPiece()->decrementMoveCounter();
 
         // update display
-        theBoard[0][0]->notifyDisplayObservers(*theBoard[3][0]);
+        if (checkMateType) theBoard[0][0]->notifyDisplayObservers(*theBoard[3][0]);
+        if (checkMateType) theBoard[0][0]->notifyGraphicsObservers(*theBoard[3][0]);
+
         updateCellObservers(Coord{4,0}, Coord{2,0}, checkMateType);
         updateCellObservers(Coord{0,0}, Coord{3,0}, checkMateType);
     }
     else
     {
-        if (!(whiteKing->getCoordinate() == Coord{4, 7})) return false;
+        if (!(blackKing->getCoordinate() == Coord{4, 7})) return false;
         if (blackKing->getPiece()->getMoveCounter() != 0)
             return false; // king has moved
         if (!theBoard[0][7]->getPiece())
@@ -940,7 +959,9 @@ bool Board::longCastle(bool checkMateType)
         theBoard[2][7]->getPiece()->decrementMoveCounter();
 
         // update display
-        theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
+        if (checkMateType) theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
+        if (checkMateType) theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
+
         updateCellObservers(Coord{4,7}, Coord{2,7}, checkMateType);
         updateCellObservers(Coord{0,7}, Coord{3,7}, checkMateType);
     }

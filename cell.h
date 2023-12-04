@@ -19,7 +19,7 @@ class Cell : public Observer
   public:
     Cell(Coord coordinate);
     Cell(Coord coordinate, Piece *p);
-    Cell(Coord coordinate, Piece *p, std::shared_ptr<Observer> o);
+    Cell(Coord coordinate, Piece *p, std::shared_ptr<Observer> td, std::shared_ptr<Observer> gd);
     ~Cell();
 
     // I don't think we need copy/move ctor or assignment operator
@@ -29,6 +29,7 @@ class Cell : public Observer
 
     // tells display observers that piece has been moved
     void notifyDisplayObservers(Cell &dest);
+    void notifyGraphicsObservers(Cell &dest);
 
     // calls move
     void notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state) override;
