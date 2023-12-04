@@ -24,12 +24,14 @@ bool LevelThree::move() {
 	for (size_t i = 0; i < vmoves.size(); ++i) {
 		b->move(vmoves[i][0], vmoves[i][1]);
 		evalTree.addChild(b->getEvalScore(), vmoves[i]);
-		vector<vector<Coord>> childvmoves = b->validMoves();
 		undoinfos.emplace_back(b->undoInfo);
-		for (size_t j = 0; j < childvmoves.size(); ++j) {
-			b->move(childvmoves[j][0], childvmoves[j][1]);
-			evalTree.addChild(b->getEvalScore(), childvmoves[j]);
-			b->undo();
+		if (b->getState() != State::Checkmate || b->getState() != State::Stalement) {
+			vector<vector<Coord>> childvmoves = b->validMoves();
+			for (size_t j = 0; j < childvmoves.size(); ++j) {
+				b->move(childvmoves[j][0], childvmoves[j][1]);
+				evalTree.children[i]->addChild(b->getEvalScore(), childvmoves[j]);
+				b->undo();
+			}
 		}
 		b->undoInfo = undoinfos[undoinfos.size() - 1];
 		undoinfos.pop_back();
