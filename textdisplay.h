@@ -19,6 +19,7 @@ class TextDisplay: public Observer {
     public:
     TextDisplay();
     ~TextDisplay();
+    TextDisplay(const TextDisplay& other);
 
     // updates the pieces on the coordinates of c and dest on theDisplay
     void notify(Cell& c, Cell& dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) override;

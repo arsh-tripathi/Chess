@@ -85,10 +85,12 @@ class Board {
 	// !!! Remember to add/initialize graphics display once everything is complete
 	Board();
 	~Board();
-	Board(Board &other);
+	Board(const Board &other);
 	Board(Board &&other);
 	Board &operator=(Board &other);
 	Board &operator=(Board &&other);
+
+	// methods
 
 	// methods
 
