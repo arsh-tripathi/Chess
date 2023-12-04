@@ -404,6 +404,34 @@ bool Board::noPromoPawns() {
     return true;
 }
 
+bool Board::setupCheck() {
+
+    bool noCheck = true;
+
+    updatePiecesattackingKing(Colour::Black);
+    updatePiecesattackingKing(Colour::White);
+
+    if(whiteKing) {
+        for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
+            if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate(), Colour::Black)) {
+                noCheck = false;
+                break;
+            }
+        }
+    }
+
+    if(blackKing) {
+        for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
+            if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate(), Colour::White)) {
+                noCheck = false;
+                break;
+            }
+        } 
+    } 
+
+    return noCheck;
+}
+
 bool Board::isWhiteTurn() { return isWhiteMove;}
 
 void Board::setWhiteTurn(bool whiteTurn) { 
@@ -706,6 +734,7 @@ void Board::checkForCheck(bool checkMateType) {
         isWhiteMove = !isWhiteMove;
     }
 }
+
 void Board::checkForMate(bool checkMateType) {
     if (!checkMateType) return;
     if (status == State::Check) { // check for possible checkmate

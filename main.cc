@@ -26,7 +26,7 @@ bool isValidSquare(string square) { // takes e7 or h4
     return true;
 }
 
-Coord convertToCoord(string square) { // takes e7 or h4
+Coord convertToCoord(string square) {
     int x, y;
     char alpha;
     istringstream sq{square};
@@ -61,7 +61,7 @@ Coord convertToCoord(string square) { // takes e7 or h4
 
     sq >> y;
 
-    return Coord{x, y - 1}; // to just for -1 difference
+    return Coord{x, y - 1};
 }
 
 int main(void) {
@@ -97,11 +97,9 @@ int main(void) {
                         if(!(b.noPromoPawns())) {
                             canLeave = false;
                         }
-                        // check if current board is in check *TODO*
-
-                        // if(!(b.getState() == State::Normal)) { // this is only problem
-                        //     canLeave = false;                            
-                        // }
+                        if(!(b.setupCheck())) {
+                            canLeave = false;                            
+                        }
 
                         if(canLeave) {
                             cout << "Exiting Setup Mode..." << endl;
@@ -217,13 +215,17 @@ int main(void) {
                     }
                 }
             } else if (cmd == "game") { // GAME
-                string white, black;
-                cin >> white >> black; // for now both human and unused
+                
+                string white, black; // CONTAINS EITHER HUMAN, COMPUTER[1], ETC.
+                cin >> white >> black;
 
-                // set up players
+
+                // ** FILL IN WITH CREATING COMPUTER OR HUMAN OBJS **
+
                 Human p1{Colour::White};
                 Human p2{Colour::Black};
-                // set up players
+
+                // ** FILL IN WITH CREATING COMPUTER OR HUMAN OBJS **
 
                 if(!custom) {
                     b.setupDefaultBoard();
@@ -278,14 +280,14 @@ int main(void) {
                     if(b.getState() == State::Checkmate) {
 
                         if(b.isWhiteTurn()) {
-
+                            blackPlayer = blackPlayer + 1;
                             cout << "Checkmate! Black wins!" << endl;    
                         } else {
-                            
+                            whitePlayer = whitePlayer + 1;    
                             cout << "Checkmate! White wins!" << endl; 
                         }
 
-                        break; // takes us all the way out to while(true)
+                        break;
                     }
                     if(b.getState() == State::Resign) { 
 
@@ -308,9 +310,6 @@ int main(void) {
                 }
                 break;
 
-            } else if (cmd == "quit") {
-                // for testing 
-                break;
             } else { // didn't enter setup game or quit
                 cerr << "Enter Valid Command" << endl;
             }

@@ -100,6 +100,7 @@ class Board
     
     bool placedKings();
     bool noPromoPawns();
+    bool setupCheck();
 
     bool isWhiteTurn();
     // passing true means it's whites turn, false black's

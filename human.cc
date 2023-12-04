@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-bool isValidSquare1(string square) { // takes e7 or h4
+bool isValidSquare1(string square) {
     char x;
     int y;
     string dump;
@@ -22,7 +22,7 @@ bool isValidSquare1(string square) { // takes e7 or h4
     return true;
 }
 
-Coord convertToCoord1(string square) { // takes e7 or h4
+Coord convertToCoord1(string square) {
     int x, y;
     char alpha;
     istringstream sq{square};
@@ -57,7 +57,7 @@ Coord convertToCoord1(string square) { // takes e7 or h4
 
     sq >> y;
 
-    return Coord{x, y - 1}; // to just for -1 difference
+    return Coord{x, y - 1};
 }
 
 using namespace std;
@@ -72,12 +72,12 @@ bool Human::move() {
         Coord destC = convertToCoord1(dest);        
 
         PieceType p;
-        if(b->theBoard[currC.x()][currC.y()]->getPiece()) { // not nullptr
+        if(b->theBoard[currC.x()][currC.y()]->getPiece()) {
             p = b->theBoard[currC.x()][currC.y()]->getPiece()->getPieceType();
         }
 
         if(p == PieceType::King) {
-            if(b->isWhiteTurn()) { // white king
+            if(b->isWhiteTurn()) {
                 if(currC == Coord{4, 0} && destC == Coord{6, 0}) {
                     if (!(b->shortCastle(true))) {
                         return false;                              
