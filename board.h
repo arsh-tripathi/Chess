@@ -8,7 +8,6 @@
 
 #include "bishop.h"
 #include "cell.h"
-#include "computer.h"
 #include "enums.h"
 #include "globals.h"
 #include "king.h"

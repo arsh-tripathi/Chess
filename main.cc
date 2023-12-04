@@ -28,6 +28,9 @@ int main(void) {
 	LevelOne l1(Colour::Black);
 	LevelTwo l2(Colour::Black);
 	LevelThree l3(Colour::Black);
+	l1.setBoard(&b);
+	l2.setBoard(&b);
+	l3.setBoard(&b);
 	// Board c {b};
 
 	// ==========================

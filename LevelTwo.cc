@@ -3,19 +3,21 @@
 #include "computer.h"
 #include "enums.h"
 #include "player.h"
+#include "undoInfo.h"
 
 using namespace std;
 
 LevelTwo::LevelTwo(Colour c) : Player{c} {}
 
 bool LevelTwo::move() {
+	UndoInfo original{b->undoInfo};
 	vector<vector<Coord>> vmoves = b->validMoves();
 	if (vmoves.size() == 0) {
 		cerr << "Valid moves for computer is empty" << endl;
 		return false;
 	}
-	Coord start;
-	Coord end;
+	Coord start{0, 0};
+	Coord end{0, 0};
 	int maxeval = -1000;
 	int mineval = 1000;
 	for (size_t i = 0; i < vmoves.size(); ++i) {
@@ -37,6 +39,7 @@ bool LevelTwo::move() {
 			b->undo();
 		}
 	}
+	b->undoInfo = original;
 	b->move(start, end);
 	return true;
 }

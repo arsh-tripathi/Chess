@@ -29,14 +29,14 @@ bool LevelThree::move() {
 		for (size_t j = 0; j < childvmoves.size(); ++j) {
 			b->move(childvmoves[j][0], childvmoves[j][1]);
 			evalTree.addChild(b->getEvalScore(), childvmoves[j]);
-			undo();
+			b->undo();
 		}
 		b->undoInfo = undoinfos[undoinfos.size() - 1];
-		b.pop_back();
-		undo();
+		undoinfos.pop_back();
+		b->undo();
 	}
 	b->undoInfo = undoinfos[undoinfos.size() - 1];
-	b.pop_back();
+	undoinfos.pop_back();
 	vector<Coord> finalmove = evalTree.findMaxPath();
 	b->move(finalmove[0], finalmove[1]);
 	return true;
