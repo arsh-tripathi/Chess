@@ -98,6 +98,8 @@ class Board
     // sets up default chess board by calling placePiece(...)
     void setupDefaultBoard();
     
+    bool placedKings();
+    bool noPromoPawns();
 
     bool isWhiteTurn();
     // passing true means it's whites turn, false black's

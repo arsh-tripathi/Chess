@@ -170,14 +170,24 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
     }
     else if (pt == PieceType::King)
     {
-        nPiece = make_unique<King>(coord, colour);
+        //
         if (colour == Colour::White)
-        {
-            whiteKing = theBoard[coord.x()][coord.y()];
+        {   
+            if(whiteKing) {
+                cerr << "Error: cannot place two kings" << endl;
+            } else {    
+                nPiece = make_unique<King>(coord, colour);
+                whiteKing = theBoard[coord.x()][coord.y()];
+            }
         }
         else
         {
-            blackKing = theBoard[coord.x()][coord.y()];
+            if(blackKing) {
+                cerr << "Error: cannot place two kings" << endl;
+            } else {    
+                nPiece = make_unique<King>(coord, colour);
+                blackKing = theBoard[coord.x()][coord.y()];
+            }
         }
     }
     else
@@ -215,11 +225,15 @@ void Board::removePiece(Coord coord) {
         // check which colour
         Colour col;
         col = theBoard[coord.x()][coord.y()]->getPiece()->getColour();
-        
+        PieceType p = theBoard[coord.x()][coord.y()]->getPiece()->getPieceType();
+
         // remove raw pointer at cell
         theBoard[coord.x()][coord.y()]->setPiece(nullptr);
 
         if(col == Colour::White) {
+            if(p == PieceType::King) {
+                whiteKing = nullptr;
+            }
             // find piece and destroy it
             for(auto it = whitePieces.begin(); it != whitePieces.end(); ++it) {
                 if((*it)->getPos() == coord) {
@@ -229,6 +243,9 @@ void Board::removePiece(Coord coord) {
             }
 
         } else {
+            if(p == PieceType::King) {
+                blackKing = nullptr;
+            }
             // find piece and destroy it
             for(auto it = blackPieces.begin(); it != blackPieces.end(); ++it) {
                 if((*it)->getPos() == coord) {
@@ -356,6 +373,35 @@ void Board::updatePiecesattackingKing(const Colour col) {
             }
         }
     }
+}
+
+bool Board::placedKings() {
+
+    if(whiteKing && blackKing) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+bool Board::noPromoPawns() {
+
+    // loop thru white pieces
+    for(size_t i = 0; i < whitePieces.size(); ++i) {
+        if(whitePieces[i]->getPieceType() == PieceType::Pawn && whitePieces[i]->getPos().y() == 7) {
+            return false;
+        }
+    }
+
+    // loop thru black pieces
+    for(size_t i = 0; i < blackPieces.size(); ++i) {
+        if(blackPieces[i]->getPieceType() == PieceType::Pawn && blackPieces[i]->getPos().y() == 0) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 bool Board::isWhiteTurn() { return isWhiteMove;}
@@ -581,7 +627,7 @@ bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
         bool notGotPiece = true;
         while (notGotPiece)
         {
-            cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
+            //cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
             char piece;
             if (cin >> piece)
             {
