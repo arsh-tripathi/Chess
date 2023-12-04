@@ -22,7 +22,7 @@ bool LevelTwo::move() {
 	int mineval = 1000;
 	for (size_t i = 0; i < vmoves.size(); ++i) {
 		if (c == Colour::White) {
-			b->move(vmoves[i][0], vmoves[i][1]);
+			if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
 			if (maxeval < b->getEvalScore()) {
 				maxeval = b->getEvalScore();
 				start = vmoves[i][0];
@@ -30,7 +30,7 @@ bool LevelTwo::move() {
 			}
 			b->undo();
 		} else {
-			b->move(vmoves[i][0], vmoves[i][1]);
+			if (b->move(vmoves[i][0], vmoves[i][1])) continue;
 			if (mineval > b->getEvalScore()) {
 				mineval = b->getEvalScore();
 				start = vmoves[i][0];
