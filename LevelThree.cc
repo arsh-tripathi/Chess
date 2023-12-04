@@ -22,13 +22,13 @@ bool LevelThree::move() {
 		return false;
 	}
 	for (size_t i = 0; i < vmoves.size(); ++i) {
-		b->move(vmoves[i][0], vmoves[i][1]);
+		if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
 		evalTree.addChild(b->getEvalScore(), vmoves[i]);
 		undoinfos.emplace_back(b->undoInfo);
 		if (b->getState() != State::Checkmate || b->getState() != State::Stalement) {
 			vector<vector<Coord>> childvmoves = b->validMoves();
 			for (size_t j = 0; j < childvmoves.size(); ++j) {
-				b->move(childvmoves[j][0], childvmoves[j][1]);
+				if (!b->move(childvmoves[j][0], childvmoves[j][1])) continue;
 				evalTree.children[i]->addChild(b->getEvalScore(), childvmoves[j]);
 				b->undo();
 			}
@@ -39,7 +39,11 @@ bool LevelThree::move() {
 	}
 	b->undoInfo = undoinfos[undoinfos.size() - 1];
 	undoinfos.pop_back();
-	vector<Coord> finalmove = evalTree.findMaxPath();
+	vector<Coord> finalmove;
+	if (b->isWhiteTurn())
+		finalmove = evalTree.MaxMin();
+	else
+		finalmove = evalTree.MinMax();
 	b->move(finalmove[0], finalmove[1]);
 	return true;
 }
