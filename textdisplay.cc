@@ -57,6 +57,10 @@ TextDisplay::TextDisplay(const TextDisplay& other) {
     }
 }
 
+char TextDisplay::pieceChar(int x, int y) {
+    return theDisplay[x][y];
+}
+
 
 TextDisplay::TextDisplay()
 {

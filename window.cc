@@ -59,10 +59,11 @@ Xwindow::~Xwindow() {
   XCloseDisplay(d);
 }
 
-void Xwindow::fillRectangle(int x, int y, int width, int height, int colour) {
-  XSetForeground(d, gc, colours[colour]);
+void Xwindow::fillRectangle(int x, int y, int width, int height, unsigned long colour) {
+  XSetForeground(d, gc, colour);
   XFillRectangle(d, w, gc, x, y, width, height);
   XSetForeground(d, gc, colours[Black]);
+
 }
 
 void Xwindow::drawString(int x, int y, string msg) {

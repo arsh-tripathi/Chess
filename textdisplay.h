@@ -23,8 +23,9 @@ class TextDisplay: public Observer {
 
     // updates the pieces on the coordinates of c and dest on theDisplay
     void notify(Cell& c, Cell& dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) override;
-
     SubscriptionType subType() override;
+
+    char pieceChar(int x, int y);
 
     friend ostream &operator<<(ostream &out, const TextDisplay &td);
 };
