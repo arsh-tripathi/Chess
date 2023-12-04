@@ -400,7 +400,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 				isWhiteMove = !isWhiteMove;
 				theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
 				theBoard[curr.x()][curr.y()]->setPiece(king);
-				cerr << "White King moved into check by xy: " << blackPieces[i]->getPos().x() << blackPieces[i]->getPos().y() << endl;
+				cerr << "White King moved into check by xy: " << whitePieces[i]->getPos().x() << whitePieces[i]->getPos().y() << endl;
 				return false;
 			}
 		}
