@@ -108,7 +108,14 @@ class Board {
 	// sets up default chess board by calling placePiece(...)
 	void setupDefaultBoard();
 
+  void removePiece(Coord coord);
+  bool placedKings();
+  bool noPromoPawns();
+  bool setupCheck();
+  
+  void setWhiteTurn(bool white);
 	bool isWhiteTurn();
+
 	void toggleTurn();
 
 	/**

@@ -139,6 +139,104 @@ int pieceTypeToPoints(PieceType pt) {
 	}
 }
 
+void Board::removePiece(Coord coord) {
+
+    // first check if there's a piece there
+    if(theBoard[coord.x()][coord.y()]->getPiece()) {
+
+        // check which colour
+        Colour col;
+        col = theBoard[coord.x()][coord.y()]->getPiece()->getColour();
+        PieceType p = theBoard[coord.x()][coord.y()]->getPiece()->getPieceType();
+
+        // remove raw pointer at cell
+        theBoard[coord.x()][coord.y()]->setPiece(nullptr);
+
+        if(col == Colour::White) {
+            if(p == PieceType::King) {
+                whiteKing = nullptr;
+            }
+            // find piece and destroy it
+            for(auto it = whitePieces.begin(); it != whitePieces.end(); ++it) {
+                if((*it)->getPos() == coord) {
+                    whitePieces.erase(it);
+                    break;
+                }
+            }
+
+        } else {
+            if(p == PieceType::King) {
+                blackKing = nullptr;
+            }
+            // find piece and destroy it
+            for(auto it = blackPieces.begin(); it != blackPieces.end(); ++it) {
+                if((*it)->getPos() == coord) {
+                    blackPieces.erase(it);
+                    break;
+                }
+            }
+        }
+        theBoard[coord.x()][coord.y()]->notifyDisplayObservers(*theBoard[0][0]);
+    }
+    // else take no action
+}
+
+bool Board::placedKings() {
+
+    if(whiteKing && blackKing) {
+        return true;
+    } else {
+        return false;
+    }
+
+}
+
+bool Board::noPromoPawns() {
+
+    // loop thru white pieces
+    for(size_t i = 0; i < whitePieces.size(); ++i) {
+        if(whitePieces[i]->getPieceType() == PieceType::Pawn && whitePieces[i]->getPos().y() == 7) {
+            return false;
+        }
+    }
+
+    // loop thru black pieces
+    for(size_t i = 0; i < blackPieces.size(); ++i) {
+        if(blackPieces[i]->getPieceType() == PieceType::Pawn && blackPieces[i]->getPos().y() == 0) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool Board::setupCheck() {
+
+    bool noCheck = true;
+
+    if(whiteKing) {
+		updatePiecesattackingKing(Colour::White);
+        for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
+            if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate(), Colour::Black)) {
+                noCheck = false;
+                break;
+            }
+        }
+    }
+
+    if(blackKing) {
+		updatePiecesattackingKing(Colour::Black);
+        for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
+            if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate(), Colour::White)) {
+                noCheck = false;
+                break;
+            }
+        } 
+    } 
+
+    return noCheck;
+}
+
 void Board::updateEvalPromotion() {
 	int score = 0;
 	for (size_t i = 0; i < whitePieces.size(); ++i) {
@@ -168,45 +266,62 @@ void Board::updateEvalScore(Colour col, Piece *piece, State state) {
 
 // creates pieces (adds to blackpieces or whitepieces) and places raw pointer
 // at cell
-void Board::placePiece(Colour colour, Coord coord, PieceType pt) {
-	// create piece
-	unique_ptr<Piece> nPiece;
-	if (pt == PieceType::Pawn) {
-		nPiece = make_unique<Pawn>(coord, colour);
-	} else if (pt == PieceType::Rook) {
-		nPiece = make_unique<Rook>(coord, colour);
-	} else if (pt == PieceType::Knight) {
-		nPiece = make_unique<Knight>(coord, colour);
-	} else if (pt == PieceType::Bishop) {
-		nPiece = make_unique<Bishop>(coord, colour);
-	} else if (pt == PieceType::Queen) {
-		nPiece = make_unique<Queen>(coord, colour);
-	} else if (pt == PieceType::King) {
-		nPiece = make_unique<King>(coord, colour);
-		if (colour == Colour::White) {
-			whiteKing = theBoard[coord.x()][coord.y()];
-		} else {
-			blackKing = theBoard[coord.x()][coord.y()];
-		}
-	} else {
-		cerr << "ERROR: Board.h => void placePiece(...) => invalid PieceType" << endl;
-		// maybe throw exception
+void Board::placePiece(Colour colour, Coord coord, PieceType pt)
+{
+	// check if already exists a piece at Coord
+	if (getCell(coord)->getPiece() != nullptr) { 
+		cerr << "There is already a piece at the position!" << endl;
+		return; 
 	}
-	// place raw pointer contained in piece to Cell at Coord
-	theBoard[coord.x()][coord.y()]->setPiece(nPiece.get());
 
-	// move ownership to black or white pieces
-	if (colour == Colour::White) {
-		whitePieces.emplace_back(std::move(nPiece));  //!!! make sure this is calling move from <utility>
-	} else if (colour == Colour::Black) {
-		blackPieces.emplace_back(std::move(nPiece));  //!!! make sure this is calling move from <utility>
-	} else {
-		cerr << "ERROR: Board.h => void placePiece(...) => invalid Colour" << endl;
-		// maybe throw exception
-	}
+    // create piece
+    unique_ptr<Piece> nPiece;
+    if (pt == PieceType::Pawn) {
+        nPiece = make_unique<Pawn>(coord, colour);
+    } else if (pt == PieceType::Rook) {
+        nPiece = make_unique<Rook>(coord, colour);
+    } else if (pt == PieceType::Knight) {
+        nPiece = make_unique<Knight>(coord, colour);
+    } else if (pt == PieceType::Bishop) {
+        nPiece = make_unique<Bishop>(coord, colour);
+    } else if (pt == PieceType::Queen) {
+        nPiece = make_unique<Queen>(coord, colour);
+    } else if (pt == PieceType::King) {
+        if (colour == Colour::White) {   
+            if (whiteKing) {
+                cerr << "Error: cannot place two kings" << endl;
+            } else {    
+                nPiece = make_unique<King>(coord, colour);
+                whiteKing = theBoard[coord.x()][coord.y()];
+            }
+        }
+        else {
+            if (blackKing) {
+                cerr << "Error: cannot place two kings" << endl;
+            } else {    
+                nPiece = make_unique<King>(coord, colour);
+                blackKing = theBoard[coord.x()][coord.y()];
+            }
+        }
+    } else {
+        cerr << "ERROR: Board.h => void placePiece(...) => invalid PieceType" << endl;
+        // maybe throw exception
+    }
+    // place raw pointer contained in piece to Cell at Coord
+    theBoard[coord.x()][coord.y()]->setPiece(nPiece.get());
+
+    // move ownership to black or white pieces
+    if (colour == Colour::White) {
+        whitePieces.emplace_back(std::move(nPiece)); //!!! make sure this is calling move from <utility>
+    } else if (colour == Colour::Black) {
+        blackPieces.emplace_back(std::move(nPiece)); //!!! make sure this is calling move from <utility>
+    } else {
+        cerr << "ERROR: Board.h => void placePiece(...) => invalid Colour" << endl;
+        // maybe throw exception
+    }
 
     theBoard[coord.x()][coord.y()]->notifyDisplayObservers(*theBoard[0][0]);
-    //theBoard[coord.x()][coord.y()]->notifyGraphicsObservers(*theBoard[0][0]);
+
 }
 
 // sets up default chess board by calling placePiece(...)
@@ -324,6 +439,7 @@ void Board::updatePiecesattackingKing(const Colour col) {
 	}
 }
 
+void Board::setWhiteTurn(bool white) { isWhiteMove = white; }
 bool Board::isWhiteTurn() { return isWhiteMove; }
 
 void Board::toggleTurn() { isWhiteMove = !isWhiteMove; }
