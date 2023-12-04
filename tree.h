@@ -17,7 +17,7 @@ struct Tree {
 		if (children.size() == 0) return evalScore;
 		int maxscore = -1000;
 		for (size_t i = 0; i < children.size(); ++i) {
-			int calcscore = children[i]->findMaxEval();
+			int calcscore = children[i]->findMinEval();
 			if (maxscore < calcscore) maxscore = calcscore;
 		}
 		return maxscore;
@@ -26,12 +26,12 @@ struct Tree {
 		if (children.size() == 0) return evalScore;
 		int minscore = 1000;
 		for (size_t i = 0; i < children.size(); ++i) {
-			int calcscore = children[i]->findMinEval();
+			int calcscore = children[i]->findMaxEval();
 			if (minscore > calcscore) minscore = calcscore;
 		}
 		return minscore;
 	}
-	vector<Coord> findMaxPath() {
+	vector<Coord> MaxMin() {
 		int maxscore = -1000;
 		shared_ptr<Tree> child;
 		for (size_t i = 0; i < children.size(); ++i) {
@@ -44,7 +44,7 @@ struct Tree {
 		vector<Coord> move{child->start, child->end};
 		return move;
 	}
-	vector<Coord> findMinPath() {
+	vector<Coord> MinMax() {
 		int minscore = 1000;
 		shared_ptr<Tree> child;
 		for (size_t i = 0; i < children.size(); ++i) {
