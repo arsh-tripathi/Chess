@@ -12,9 +12,10 @@ Cell::Cell(Coord coordinate) : coordinate{coordinate}, p{nullptr}
 Cell::Cell(Coord coordinate, Piece *p) : coordinate{coordinate}, p{p}
 {
 }
-Cell::Cell(Coord coordinate, Piece *p, std::shared_ptr<Observer> o) : coordinate{coordinate}, p{p}
+Cell::Cell(Coord coordinate, Piece *p, shared_ptr<Observer> td, shared_ptr<Observer> gd) : coordinate{coordinate}, p{p}
 {
-    observers.emplace_back(o);
+    observers.emplace_back(td);
+    observers.emplace_back(gd);
 }
 Cell::~Cell()
 {
@@ -43,8 +44,18 @@ void Cell::notifyDisplayObservers(Cell &dest)
 {
     for (size_t i = 0; i < observers.size(); ++i)
     {
-        if (observers[i]->subType() == SubscriptionType::Display)
-        {
+        if (observers[i]->subType() == SubscriptionType::Display) {
+            observers[i]->notify(*this, dest);
+        }
+    }
+}
+
+// tells graphics observers that piece has been moved
+void Cell::notifyGraphicsObservers(Cell &dest)
+{
+    for (size_t i = 0; i < observers.size(); ++i)
+    {
+        if (observers[i]->subType() == SubscriptionType::Graphics) {
             observers[i]->notify(*this, dest);
         }
     }

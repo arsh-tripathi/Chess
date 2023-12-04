@@ -17,6 +17,13 @@
 #include "rook.h"
 #include "textdisplay.h"
 #include "undoInfo.h"
+#include "window.h"
+#include "graphicsdisplay.h"
+
+#include <fstream>
+#include <memory>
+#include <utility>
+#include <vector>
 
 using namespace std;
 
@@ -32,9 +39,10 @@ class Board {
 	vector<shared_ptr<Cell>> piecesAttackingWhiteKing;
 	vector<shared_ptr<Cell>> piecesAttackingBlackKing;
 
-	std::vector<std::vector<std::shared_ptr<Cell>>> theBoard;
-	std::shared_ptr<TextDisplay> td = nullptr;	// initializabled in some init function
-	// GraphicsDisplay* gd;
+    std::vector<std::vector<std::shared_ptr<Cell>>> theBoard;
+    std::shared_ptr<TextDisplay> td = nullptr; // initializabled in some init function
+    Xwindow xw; // xw display
+    std::shared_ptr<GraphicsDisplay> gd = nullptr; // The graphics display
 
 	bool isWhiteMove = true;
 	State status = State::Normal;  // normal, check, checkmate, statemate, resign, invalid

@@ -26,61 +26,73 @@ Piece *Board::getPiece(Coord c) { return getCell(c)->getPiece(); }
 // **** undo should decrement move counter => done from notify
 // undo resets the chessboard back to its state one move ago, as stored in
 // undoInfo
-void Board::undo() {
-	// update Evaluation Score !!! REVERSE EVAL SCORE
-	evalScore = undoInfo.previousEvalScore;
-	// update status
-	status = undoInfo.status;
-	// update white/black turn
-	isWhiteMove = !isWhiteMove;
-	// move pieces back to original
-	if (theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece()->getPieceType() == PieceType::King) {
-		Colour col = theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece()->getColour();
-		if (col == Colour::White) {
-			whiteKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
-		} else {
-			blackKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
-		}
-	}
-	if (undoInfo.enPassant) {
-		int difference = isWhiteMove ? -1 : 1;
-		theBoard[undoInfo.end.x()][undoInfo.end.y()]->enPassantUndo(*theBoard[undoInfo.start.x()][undoInfo.start.y()],
-																	*theBoard[undoInfo.end.x()][undoInfo.end.y() + difference], &undoInfo, &status);
-		theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(*theBoard[undoInfo.end.x()][undoInfo.end.x()]);
-		theBoard[undoInfo.end.x()][undoInfo.end.y() + difference]->notifyDisplayObservers(*theBoard[0][0]);
-	}
-	theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()], &undoInfo);
-	theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
+void Board::undo()
+{   
+    // update Evaluation Score !!! REVERSE EVAL SCORE
+    evalScore = undoInfo.previousEvalScore;
+    // update status
+    status = undoInfo.status;
+    // update white/black turn
+    isWhiteMove = !isWhiteMove;
+    // move pieces back to original
+    if (theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece()->getPieceType() == PieceType::King) {
+        Colour col = theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece()->getColour();
+        if (col == Colour::White) {
+            whiteKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
+        } else {
+            blackKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
+        }
+    }
+    if (undoInfo.enPassant)
+    {
+        int difference = isWhiteMove ? -1 : 1;
+        theBoard[undoInfo.end.x()][undoInfo.end.y()]->enPassantUndo(
+            *theBoard[undoInfo.start.x()][undoInfo.start.y()],
+            *theBoard[undoInfo.end.x()][undoInfo.end.y() + difference], &undoInfo, &status);
+        theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(
+            *theBoard[undoInfo.end.x()][undoInfo.end.x()]);
+        theBoard[undoInfo.end.x()][undoInfo.end.y() + difference]->notifyDisplayObservers(*theBoard[0][0]);
+    }
+    theBoard[undoInfo.end.x()][undoInfo.end.y()]->move(*theBoard[undoInfo.start.x()][undoInfo.start.y()], &undoInfo);
+    theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
+    theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyGraphicsObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
 }
 
 // !!! Remember to add/initialize graphics display once everything is complete
-Board::Board() : td{make_shared<TextDisplay>()} {
-	// initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
-	for (int r = 0; r < boardSize; ++r) {
-		vector<shared_ptr<Cell>> row;
-		for (int c = 0; c < boardSize; ++c) {
-			row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td));
-		}
-		theBoard.emplace_back(row);
-	}
+Board::Board() : td{make_shared<TextDisplay>()}, xw{Xwindow{700, 700}}
+{
+    gd = make_shared<GraphicsDisplay>(xw, td);
+    // initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
+    for (int r = 0; r < boardSize; ++r)
+    {
+        vector<shared_ptr<Cell>> row;
+        for (int c = 0; c < boardSize; ++c)
+        {
+            row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td, gd));
+        }
+        theBoard.emplace_back(row);
+    }
 }
 
 Board::~Board() {  // unclear which elements need to be destructed
 }
 
-Board::Board(const Board &other) : isWhiteMove{other.isWhiteMove}, status{other.status}, evalScore{0}, td{make_shared<TextDisplay>(*(other.td))} {
-	// fields
-	// no idea how to do undoInfo because of piece*
+Board::Board(const Board &other) : isWhiteMove{other.isWhiteMove}, status{other.status}, evalScore{0}, xw{Xwindow{}}, td{make_shared<TextDisplay>(*(other.td))}
+{ 
+    gd = make_shared<GraphicsDisplay>(xw, td);
+    // fields
+    // no idea how to do undoInfo because of piece*
 
-	// setup
-	// initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
-	for (int r = 0; r < boardSize; ++r) {
-		vector<shared_ptr<Cell>> row;
-		for (int c = 0; c < boardSize; ++c) {
-			row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td));
-		}
-		theBoard.emplace_back(row);
-	}
+    // setup 
+    // initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
+    for (int r = 0; r < boardSize; ++r) {
+        vector<shared_ptr<Cell>> row;
+        for (int c = 0; c < boardSize; ++c)
+        {
+            row.emplace_back(make_shared<Cell>(Coord{r, c}, nullptr, td, gd));
+        }
+        theBoard.emplace_back(row);
+    }
 
 	// setup pieces
 	for (size_t i = 0; i < other.whitePieces.size(); ++i) {
@@ -197,7 +209,8 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt) {
 		// maybe throw exception
 	}
 
-	theBoard[coord.x()][coord.y()]->notifyDisplayObservers(*theBoard[0][0]);
+    theBoard[coord.x()][coord.y()]->notifyDisplayObservers(*theBoard[0][0]);
+    theBoard[coord.x()][coord.y()]->notifyGraphicsObservers(*theBoard[0][0]);
 }
 
 // sets up default chess board by calling placePiece(...)
@@ -284,11 +297,14 @@ void Board::setupDefaultBoard() {
 	// Add White King to field whiteKing
 	blackKing = theBoard[4][7];
 
-	// update the display
-	for (int i = 0; i < boardSize; i++) {
-		td->notify(*(theBoard[i][7]), *(theBoard[i][0]));
-		td->notify(*(theBoard[i][6]), *(theBoard[i][1]));
-	}
+    // update the display
+    for (int i = 0; i < boardSize; i++)
+    {
+        td->notify(*(theBoard[i][7]), *(theBoard[i][0]));
+        td->notify(*(theBoard[i][6]), *(theBoard[i][1]));
+        gd->notify(*(theBoard[i][7]), *(theBoard[i][0]));
+        gd->notify(*(theBoard[i][6]), *(theBoard[i][1]));
+    }
 
 	updatePiecesattackingKing(Colour::Black);
 	updatePiecesattackingKing(Colour::White);
@@ -412,10 +428,11 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 		}
 	}
 
-	// update display observers
-	theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
-	updatePiecesattackingKing(Colour::White);
-	updatePiecesattackingKing(Colour::Black);
+    // update display observers
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
+    updatePiecesattackingKing(Colour::White);
+    updatePiecesattackingKing(Colour::Black);
 
 	// update Evaluation Score
 	Colour col = isWhiteMove ? Colour::Black : Colour::White;
@@ -438,31 +455,40 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 }
 
 // actually make an enpassant move or return false
-bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, bool checkMateType) {
-	int difference = isWhiteMove ? -1 : 1;
-	if (!(theBoard[dest.x()][dest.y() + difference]->getPiece())) return false;	 // the passanted square doesn't have a piece
-	if (theBoard[dest.x()][dest.y() + difference]->getPiece()->getPieceType() != PieceType::Pawn)
-		return false;															  // the passanted square dosen't have a pawn
-	if (!(undoInfo.end == Coord{dest.x(), dest.y() + difference})) return false;  // last move was not the pawn move
-	if (!(undoInfo.end - undoInfo.start == Coord{0, 2} || undoInfo.end - undoInfo.start == Coord{0, -2})) return false;	 // last wasn't double jump
-	// move the pawn
-	undoInfo.previousEvalScore = evalScore;
-	theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
-	isWhiteMove = !isWhiteMove;
-	// check invalidity if invald undo and return false
-	bool valid = updateState();
-	if (!valid) {
-		undo();	 // !!! fix undo
-		cerr << "You entered into an invalid state from that ENPASSANT move" << endl;
-		return false;
-	}
-	// if valid cature the other pawn return true
-	undoInfo.enPassant = true;
-	theBoard[capturedPiece.x()][capturedPiece.y()]->getPiece()->setAlive(false);
-	undoInfo.originalEndPiece = theBoard[capturedPiece.x()][capturedPiece.y()]->getPiece();
-	theBoard[capturedPiece.x()][capturedPiece.y()]->setPiece(nullptr);
-	theBoard[capturedPiece.x()][capturedPiece.y()]->notifyDisplayObservers(*theBoard[0][0]);
-	theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, bool checkMateType)
+{
+    int difference = isWhiteMove ? -1 : 1;
+    if (!(theBoard[dest.x()][dest.y() + difference]->getPiece()))
+        return false; // the passanted square doesn't have a piece
+    if (theBoard[dest.x()][dest.y() + difference]->getPiece()->getPieceType() != PieceType::Pawn)
+        return false; // the passanted square dosen't have a pawn
+    if (!(undoInfo.end == Coord{dest.x(), dest.y() + difference}))
+        return false; // last move was not the pawn move
+    if (!(undoInfo.end - undoInfo.start == Coord{0, 2} ||
+            undoInfo.end - undoInfo.start == Coord{0, -2}))
+        return false; // last wasn't double jump
+    // move the pawn
+    undoInfo.previousEvalScore = evalScore;
+    theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
+    isWhiteMove = !isWhiteMove;
+    // check invalidity if invald undo and return false
+    bool valid = updateState();
+    if (!valid)
+    {
+        undo(); // !!! fix undo
+        cerr << "You entered into an invalid state from that ENPASSANT move" << endl;
+        return false;
+    }
+    // if valid cature the other pawn return true
+    undoInfo.enPassant = true;
+    theBoard[capturedPiece.x()][capturedPiece.y()]->getPiece()->setAlive(false);
+    undoInfo.originalEndPiece = theBoard[capturedPiece.x()][capturedPiece.y()]->getPiece();
+    theBoard[capturedPiece.x()][capturedPiece.y()]->setPiece(nullptr);
+    if (checkMateType) theBoard[capturedPiece.x()][capturedPiece.y()]->notifyDisplayObservers(*theBoard[0][0]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+
+    if (checkMateType) theBoard[capturedPiece.x()][capturedPiece.y()]->notifyGraphicsObservers(*theBoard[0][0]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
 
 	updateCellObservers(curr, dest, checkMateType);
 
@@ -484,58 +510,65 @@ bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, boo
 	return true;
 }
 
-bool Board::promotion(Coord curr, Coord dest, bool checkMateType) {
-	// move the pawn
-	undoInfo.previousEvalScore = evalScore;
-	theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
-	isWhiteMove = !isWhiteMove;
-	// check invalidity if invald undo and return false
-	bool valid = updateState();
-	if (!valid) {
-		undo();	 // !!! fix undo
-		cerr << "You entered into an invalid state from that PROMOTION move" << endl;
-		return false;
-	}
-	// if valid capture the other pawn return true
-	theBoard[dest.x()][dest.y()]->getPiece()->setAlive(false);
-	theBoard[dest.x()][dest.y()]->setPiece(nullptr);
-	PieceType pt;
-	if (checkMateType) {
-		bool notGotPiece = true;
-		while (notGotPiece) {
-			cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
-			char piece;
-			if (cin >> piece) {
-				switch (piece) {
-					case 'R':
-						pt = PieceType::Rook;
-						notGotPiece = false;
-						break;
-					case 'N':
-						pt = PieceType::Knight;
-						notGotPiece = false;
-						break;
-					case 'B':
-						pt = PieceType::Bishop;
-						notGotPiece = false;
-						break;
-					case 'Q':
-						pt = PieceType::Queen;
-						notGotPiece = false;
-						break;
-					default:
-						cout << "Please enter a valid piece type to promote" << endl;
-				}
-				// remember colour is opposite of isWhiteMove
-			}
-		}
-	} else {
-		pt = PieceType::Pawn;
-	}
-	Colour col = isWhiteMove ? Colour::Black : Colour::White;
-	placePiece(col, dest, pt);
-	theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
-	updateCellObservers(curr, dest, checkMateType);
+bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
+{
+    // move the pawn
+    undoInfo.previousEvalScore = evalScore;
+    theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
+    isWhiteMove = !isWhiteMove;
+    // check invalidity if invald undo and return false
+    bool valid = updateState();
+    if (!valid)
+    {
+        undo(); // !!! fix undo
+        cerr << "You entered into an invalid state from that PROMOTION move" << endl;
+        return false;
+    }
+    // if valid capture the other pawn return true
+    theBoard[dest.x()][dest.y()]->getPiece()->setAlive(false);
+    theBoard[dest.x()][dest.y()]->setPiece(nullptr);
+    PieceType pt;
+    if (checkMateType) {
+        bool notGotPiece = true;
+        while (notGotPiece)
+        {
+            cout << "Enter the type of piece you want to promote to (R, N, B, Q): ";
+            char piece;
+            if (cin >> piece)
+            {
+                switch (piece)
+                {
+                case 'R':
+                    pt = PieceType::Rook;
+                    notGotPiece = false;
+                    break;
+                case 'N':
+                    pt = PieceType::Knight;
+                    notGotPiece = false;
+                    break;
+                case 'B':
+                    pt = PieceType::Bishop;
+                    notGotPiece = false;
+                    break;
+                case 'Q':
+                    pt = PieceType::Queen;
+                    notGotPiece = false;
+                    break;
+                default:
+                    cout << "Please enter a valid piece type to promote" << endl;
+                }
+                // remember colour is opposite of isWhiteMove
+            }
+        }
+    } else {
+        pt = PieceType::Pawn;
+    }
+    Colour col = isWhiteMove ? Colour::Black : Colour::White;
+    placePiece(col, dest, pt);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
+
+    updateCellObservers(curr, dest, checkMateType);
 
 	// update Evaluation Score
 	updateEvalPromotion();	// checkForMate -> validMoves absolutely CUCKS evalScore
@@ -660,10 +693,11 @@ bool Board::move(Coord curr, Coord dest, bool checkMateType) {
 	// JUST POSSIBLE MOVES SHOULD MAYBE CHECK FOR BLOCK PATHS ASWELL SO KNOW IF
 	// KING IS "ACTUALLY" UNDER ATTACK
 
-	updateCellObservers(curr, dest, checkMateType);	 // update pieces attacking opponent pieces king (!!!!! IF CURRENT CELL IS ATTACKING KING, IT
-													 // DOESN'T ACTUALLY DELETE THIS IS FINE BECAUSE ISPOSSIBLEMOVE ACCOUNTS FOR NULLPTR)
-	// update display observers
-	theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    updateCellObservers(curr, dest, checkMateType); //update pieces attacking opponent pieces king (!!!!! IF CURRENT CELL IS ATTACKING KING, IT DOESN'T ACTUALLY DELETE THIS IS FINE BECAUSE ISPOSSIBLEMOVE ACCOUNTS FOR NULLPTR)
+    // update display observers
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyDisplayObservers(*theBoard[dest.x()][dest.y()]);
+    if (checkMateType) theBoard[curr.x()][curr.y()]->notifyGraphicsObservers(*theBoard[dest.x()][dest.y()]);
+
 
 	// update undoInfo (occurs in notify)
 
@@ -721,17 +755,26 @@ bool Board::shortCastle(bool checkMateType) {
 		theBoard[5][0]->getPiece()->incrementMoveCounter();
 		theBoard[6][0]->getPiece()->decrementMoveCounter();
 
-		// update display
-		theBoard[7][0]->notifyDisplayObservers(*theBoard[5][0]);
-		updateCellObservers(Coord{4, 0}, Coord{6, 0}, checkMateType);
-		updateCellObservers(Coord{7, 0}, Coord{5, 0}, checkMateType);
-	} else {
-		if (!(blackKing->getCoordinate() == Coord{4, 7})) return false;
-		if (blackKing->getPiece()->getMoveCounter() != 0) return false;					  // king has moved
-		if (!theBoard[7][7]->getPiece()) return false;									  // there is no piece at the required location
-		if (theBoard[7][7]->getPiece()->getPieceType() != PieceType::Rook) return false;  // Owen made me do this
-		if (theBoard[7][7]->getPiece()->getMoveCounter() != 0) return false;			  // rook has moved
-		if (theBoard[6][7]->getPiece() || theBoard[5][7]->getPiece()) return false;		  // pieces block castle
+        // update display
+        if (checkMateType) theBoard[7][0]->notifyDisplayObservers(*theBoard[5][0]);
+        if (checkMateType) theBoard[7][0]->notifyGraphicsObservers(*theBoard[5][0]);
+
+        updateCellObservers(Coord{4,0}, Coord{6,0}, checkMateType);
+        updateCellObservers(Coord{7,0}, Coord{5,0}, checkMateType);
+    }
+    else
+    {
+        if (!(blackKing->getCoordinate() == Coord{4, 7})) return false;
+        if (blackKing->getPiece()->getMoveCounter() != 0)
+            return false; // king has moved
+        if (!theBoard[7][7]->getPiece())
+            return false; // there is no piece at the required location
+        if (theBoard[7][7]->getPiece()->getPieceType() != PieceType::Rook)
+            return false; // Owen made me do this
+        if (theBoard[7][7]->getPiece()->getMoveCounter() != 0)
+            return false; // rook has moved
+        if (theBoard[6][7]->getPiece() || theBoard[5][7]->getPiece())
+            return false; // pieces block castle
 
 		if (!move(Coord{4, 7}, Coord{5, 7})) return false;	// invalid first move
 		isWhiteMove = !isWhiteMove;
@@ -748,16 +791,18 @@ bool Board::shortCastle(bool checkMateType) {
 		theBoard[5][7]->getPiece()->incrementMoveCounter();
 		theBoard[6][7]->getPiece()->decrementMoveCounter();
 
-		// update display
-		theBoard[7][7]->notifyDisplayObservers(*theBoard[5][7]);
-		updateCellObservers(Coord{4, 7}, Coord{6, 7}, checkMateType);
-		updateCellObservers(Coord{7, 7}, Coord{5, 7}, checkMateType);
-	}
-	updatePiecesattackingKing(Colour::Black);
-	updatePiecesattackingKing(Colour::White);
-	// update Evaluation Score
-	Colour col = isWhiteMove ? Colour::Black : Colour::White;
-	updateEvalScore(col, undoInfo.originalEndPiece, status);  // checkForMate -> validMoves absolutely CUCKS evalScore
+        // update display
+        if (checkMateType) theBoard[7][7]->notifyDisplayObservers(*theBoard[5][7]);
+        if (checkMateType) theBoard[7][7]->notifyGraphicsObservers(*theBoard[5][7]);
+
+        updateCellObservers(Coord{4,7}, Coord{6,7}, checkMateType);
+        updateCellObservers(Coord{7,7}, Coord{5,7}, checkMateType);
+    }
+    updatePiecesattackingKing(Colour::Black);
+    updatePiecesattackingKing(Colour::White);
+    // update Evaluation Score
+    Colour col = isWhiteMove ? Colour::Black : Colour::White;
+    updateEvalScore(col, undoInfo.originalEndPiece, status); // checkForMate -> validMoves absolutely CUCKS evalScore
 
 	checkForCheck(checkMateType);
 	checkForMate(checkMateType);
@@ -801,17 +846,26 @@ bool Board::longCastle(bool checkMateType) {
 		theBoard[3][0]->getPiece()->incrementMoveCounter();
 		theBoard[2][0]->getPiece()->decrementMoveCounter();
 
-		// update display
-		theBoard[0][0]->notifyDisplayObservers(*theBoard[3][0]);
-		updateCellObservers(Coord{4, 0}, Coord{2, 0}, checkMateType);
-		updateCellObservers(Coord{0, 0}, Coord{3, 0}, checkMateType);
-	} else {
-		if (!(blackKing->getCoordinate() == Coord{4, 7})) return false;
-		if (blackKing->getPiece()->getMoveCounter() != 0) return false;					  // king has moved
-		if (!theBoard[0][7]->getPiece()) return false;									  // there is no piece at the required location
-		if (theBoard[0][7]->getPiece()->getPieceType() != PieceType::Rook) return false;  // Owen made me do this
-		if (theBoard[0][7]->getPiece()->getMoveCounter() != 0) return false;			  // rook has moved
-		if (theBoard[1][7]->getPiece() || theBoard[2][7]->getPiece() || theBoard[3][7]->getPiece()) return false;  // pieces block castle
+        // update display
+        if (checkMateType) theBoard[0][0]->notifyDisplayObservers(*theBoard[3][0]);
+        if (checkMateType) theBoard[0][0]->notifyGraphicsObservers(*theBoard[3][0]);
+
+        updateCellObservers(Coord{4,0}, Coord{2,0}, checkMateType);
+        updateCellObservers(Coord{0,0}, Coord{3,0}, checkMateType);
+    }
+    else
+    {
+        if (!(blackKing->getCoordinate() == Coord{4, 7})) return false;
+        if (blackKing->getPiece()->getMoveCounter() != 0)
+            return false; // king has moved
+        if (!theBoard[0][7]->getPiece())
+            return false; // there is no piece at the required location
+        if (theBoard[0][7]->getPiece()->getPieceType() != PieceType::Rook)
+            return false; // Owen made me do this
+        if (theBoard[0][7]->getPiece()->getMoveCounter() != 0)
+            return false; // rook has moved
+        if (theBoard[1][7]->getPiece() || theBoard[2][7]->getPiece() || theBoard[3][7]->getPiece())
+            return false; // pieces block castle
 
 		if (!move(Coord{4, 7}, Coord{3, 7})) return false;	// invalid first move
 		isWhiteMove = !isWhiteMove;
@@ -828,13 +882,16 @@ bool Board::longCastle(bool checkMateType) {
 		theBoard[3][7]->getPiece()->incrementMoveCounter();
 		theBoard[2][7]->getPiece()->decrementMoveCounter();
 
-		// update display
-		theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
-		updateCellObservers(Coord{4, 7}, Coord{2, 7}, checkMateType);
-		updateCellObservers(Coord{0, 7}, Coord{3, 7}, checkMateType);
-	}
-	updatePiecesattackingKing(Colour::Black);
-	updatePiecesattackingKing(Colour::White);
+        // update display
+        if (checkMateType) theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
+        if (checkMateType) theBoard[0][7]->notifyDisplayObservers(*theBoard[3][7]);
+
+        updateCellObservers(Coord{4,7}, Coord{2,7}, checkMateType);
+        updateCellObservers(Coord{0,7}, Coord{3,7}, checkMateType);
+    }
+    updatePiecesattackingKing(Colour::Black);
+    updatePiecesattackingKing(Colour::White);
+
 
 	// update Evaluation Score
 	Colour col = isWhiteMove ? Colour::Black : Colour::White;
