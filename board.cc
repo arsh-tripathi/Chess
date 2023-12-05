@@ -665,10 +665,9 @@ void Board::checkForMate(bool checkMateType) {
 		if (previousValidMoves.size() == 0) {
 			stateUpdated = true;
 			status = State::Checkmate;
-			if (isWhiteMove)
-				evalScore -= 100;
-			else
-				evalScore += 100;
+			if (isWhiteMove) evalScore -= 100;
+			else evalScore += 100;
+			undoInfo = og;
 			return;
 		}
 	} else {  // check for possible stalemate
@@ -676,6 +675,7 @@ void Board::checkForMate(bool checkMateType) {
 		if (previousValidMoves.size() == 0) {
 			stateUpdated = true;
 			status = State::Stalemate;
+			undoInfo = og;
 			return;
 		}
 	}
