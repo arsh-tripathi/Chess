@@ -12,9 +12,10 @@ LevelOne::LevelOne(Colour c) : Player{c} {}
 bool LevelOne::move() {
 	vector<vector<Coord>> vmoves = b->validMoves();
 	if (vmoves.size() == 0) {
-		cerr << "There are no valid moves for the AI, did not detect mate properly" << endl;
+		//cerr << "There are no valid moves for the AI, did not detect mate properly" << endl;
 		return false;
 	}
+	// Pick Random Move From validMoves and Move it
 	if (b->move(vmoves[0][0], vmoves[0][1])) {
 		bool whiteTurnParam = c == Colour::Black ? true : false;
 		b->gd->setWhiteTurn(whiteTurnParam);

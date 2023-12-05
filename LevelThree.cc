@@ -18,9 +18,10 @@ bool LevelThree::move() {
 	undoinfos.emplace_back(b->undoInfo);
 	vector<vector<Coord>> vmoves = b->validMoves();
 	if (vmoves.size() == 0) {
-		cerr << "Valid moves is empty for computer" << endl;
+		//cerr << "Valid moves is empty for computer" << endl;
 		return false;
 	}
+	// loop through all possible responses by oponent
 	for (size_t i = 0; i < vmoves.size(); ++i) {
 		if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
 		evalTree.addChild(b->getEvalScore(), vmoves[i]);

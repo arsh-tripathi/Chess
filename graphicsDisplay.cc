@@ -107,8 +107,6 @@ GraphicsDisplay::GraphicsDisplay(Xwindow& xw, shared_ptr<TextDisplay> td): xw{xw
 GraphicsDisplay::~GraphicsDisplay() {}
 
 void GraphicsDisplay::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *state) {
-    //cout << "C's Piece" << pToStr(c.getPiece()->getPieceType()) << endl;
-    //cout << "Dest's Piece" << pToStr(dest.getPiece()->getPieceType()) << endl;
     int r = c.getCoordinate().x();
     int s = c.getCoordinate().y();
     if ((r + s) % 2 == 1) {

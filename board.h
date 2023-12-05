@@ -142,8 +142,6 @@ class Board {
 	// returns all the possible moves the current player can make
 	std::vector<std::vector<Coord>> validMoves();
 
-	// TESTING
-	void printActualBoard();
 };
 
 // overload for testing

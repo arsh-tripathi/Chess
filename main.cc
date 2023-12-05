@@ -109,7 +109,7 @@ int main(void) {
                             cout << "Exiting Setup Mode..." << endl;
                             break; 
                         } else {
-                            cerr << "Cannot Leave Setup Mode" << endl;   
+                            //cerr << "Cannot Leave Setup Mode" << endl;   
                         }
                   
                     } else if (firstCmd == "+") {
@@ -119,76 +119,76 @@ int main(void) {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::White, convertToCoord(square), PieceType::King);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }                        
                         } else if (piece == "P") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::White, convertToCoord(square), PieceType::Pawn);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "Q") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::White, convertToCoord(square), PieceType::Queen);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "N") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::White, convertToCoord(square), PieceType::Knight);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "R") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::White, convertToCoord(square), PieceType::Rook);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "B") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::White, convertToCoord(square), PieceType::Bishop);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "k") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::Black, convertToCoord(square), PieceType::King);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "p") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::Black, convertToCoord(square), PieceType::Pawn);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "q") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::Black, convertToCoord(square), PieceType::Queen);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "n") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::Black, convertToCoord(square), PieceType::Knight);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "r") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::Black, convertToCoord(square), PieceType::Rook);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else if (piece == "b") {
                             if(isValidSquare(square)) {
                                 b.placePiece(Colour::Black, convertToCoord(square), PieceType::Bishop);
                             } else {
-                                cerr << "Invalid Square" << endl;                                    
+                                //cerr << "Invalid Square" << endl;                                    
                             }
                         } else {
-                            cerr << "Invalid Piece" << endl;                        
+                            //cerr << "Invalid Piece" << endl;                        
                         }
                         cout << b;
                     } else if (firstCmd == "-") {
@@ -197,7 +197,7 @@ int main(void) {
                         if(isValidSquare(square)) {
                             b.removePiece(convertToCoord(square));
                         } else {
-                            cerr << "Invalid Square" << endl;                                    
+                            //cerr << "Invalid Square" << endl;                                    
                         } 
                         cout << b;                 
                     } else if (firstCmd == "=") {
@@ -214,10 +214,10 @@ int main(void) {
                             cout << "Black Will Go Next" << endl;
 
                         } else {
-                            cerr << "Invalid Colour" << endl;                         
+                            //cerr << "Invalid Colour" << endl;                         
                         }            
                     } else {
-                        cerr << "Invalid Set Up Command" << endl;                    
+                        //cerr << "Invalid Set Up Command" << endl;                    
                     }
                 }
             } else if (cmd == "game") { // GAME
@@ -237,10 +237,10 @@ int main(void) {
 						p1 = make_shared<LevelThree>(Colour::White);
 					} else if (white == "computer[4]") {
 						// Currently NOT WORKING!!!
-						cerr << "Currently not supported!" << endl;
+						//cerr << "Currently not supported!" << endl;
 						p1 = make_shared<LevelThree>(Colour::White);
 					} else {
-						cerr << "Invalid Type of Player!" << endl;
+						//cerr << "Invalid Type of Player!" << endl;
 						continue;
 					}
 
@@ -254,10 +254,10 @@ int main(void) {
 						p2 = make_shared<LevelThree>(Colour::Black);
 					} else if (black == "computer[4]") {
 						// Currently NOT WORKING!!!
-						cerr << "Currently not supported!" << endl;
+						//cerr << "Currently not supported!" << endl;
 						p2 = make_shared<LevelThree>(Colour::Black);
 					} else {
-						cerr << "Invalid Type of Player!" << endl;
+						//cerr << "Invalid Type of Player!" << endl;
 						continue;
 					}
 					if (p1 != nullptr && p2 != nullptr) break;
@@ -288,19 +288,19 @@ int main(void) {
                             if(p1->move()) {
                                 cout << b;
                             } else {
-                                cerr << "Invalid Move" << endl;
+                                //cerr << "Invalid Move" << endl;
                             }
 
                         } else {
                             if(p2->move()) {
                                 cout << b;
                             } else {
-                                cerr << "Invalid Move" << endl;
+                                //cerr << "Invalid Move" << endl;
                             }
 
                         }
                     } else {
-                        cerr << "Invalid Game Command" << endl;                    
+                        //cerr << "Invalid Game Command" << endl;                    
                     }
 
                     if(b.getState() == State::Check) {
@@ -347,7 +347,7 @@ int main(void) {
                 break;
 
             } else { // didn't enter setup game or quit
-                cerr << "Enter Valid Command" << endl;
+                //cerr << "Enter Valid Command" << endl;
             }
         }
     }

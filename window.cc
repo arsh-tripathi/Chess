@@ -12,7 +12,7 @@ Xwindow::Xwindow(int width, int height) {
 
   d = XOpenDisplay(NULL);
   if (d == NULL) {
-    cerr << "Cannot open display" << endl;
+    //cerr << "Cannot open display" << endl;
     exit(1);
   }
   s = DefaultScreen(d);

@@ -13,11 +13,12 @@ bool LevelTwo::move() {
 	UndoInfo original{b->undoInfo};
 	vector<vector<Coord>> vmoves = b->validMoves();
 	if (vmoves.size() == 0) {
-		cerr << "Valid moves for computer is empty" << endl;
+		//cerr << "Valid moves for computer is empty" << endl;
 		return false;
 	}
 	Coord start{0, 0};
 	Coord end{0, 0};
+	// Search through all moves and find move that results in best eval score after 1 move
 	int maxeval = -1000;
 	int mineval = 1000;
 	for (size_t i = 0; i < vmoves.size(); ++i) {
@@ -39,8 +40,10 @@ bool LevelTwo::move() {
 			b->undo();
 		}
 	}
+	// Make Move
 	b->undoInfo = original;
 	b->move(start, end);
+	// Updates Turn on Graphics Display
 	bool whiteTurnParam = c == Colour::Black ? true : false;
 	b->gd->setWhiteTurn(whiteTurnParam);
 	return true;

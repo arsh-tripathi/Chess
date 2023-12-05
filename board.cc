@@ -277,7 +277,7 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
 {
 	// check if already exists a piece at Coord
 	if (getCell(coord)->getPiece() != nullptr) { 
-		cerr << "There is already a piece at the position!" << endl;
+		//cerr << "There is already a piece at the position!" << endl;
 		return; 
 	}
 
@@ -296,7 +296,7 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
     } else if (pt == PieceType::King) {
         if (colour == Colour::White) {   
             if (whiteKing) {
-                cerr << "Error: cannot place two kings" << endl;
+                //cerr << "Error: cannot place two kings" << endl;
             } else {    
                 nPiece = make_unique<King>(coord, colour);
                 whiteKing = theBoard[coord.x()][coord.y()];
@@ -304,14 +304,14 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
         }
         else {
             if (blackKing) {
-                cerr << "Error: cannot place two kings" << endl;
+                //cerr << "Error: cannot place two kings" << endl;
             } else {    
                 nPiece = make_unique<King>(coord, colour);
                 blackKing = theBoard[coord.x()][coord.y()];
             }
         }
     } else {
-        cerr << "ERROR: Board.h => void placePiece(...) => invalid PieceType" << endl;
+        //cerr << "ERROR: Board.h => void placePiece(...) => invalid PieceType" << endl;
         // maybe throw exception
     }
     // place raw pointer contained in piece to Cell at Coord
@@ -323,7 +323,7 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
     } else if (colour == Colour::Black) {
         blackPieces.emplace_back(std::move(nPiece)); //!!! make sure this is calling move from <utility>
     } else {
-        cerr << "ERROR: Board.h => void placePiece(...) => invalid Colour" << endl;
+        //cerr << "ERROR: Board.h => void placePiece(...) => invalid Colour" << endl;
         // maybe throw exception
     }
 
@@ -465,31 +465,31 @@ bool Board::isPossibleMove(Coord curr, Coord dest, Colour c) {
 	Colour currPlayerColour = c;
 	// make sure that there exists a piece at curr
 	if (theBoard[curr.x()][curr.y()]->getPiece() == nullptr) {
-		cerr << "There is no piece at the specified location" << endl;
+		//cerr << "There is no piece at the specified location" << endl;
 		return false;
 	}
 
 	// check if it is the players piece
 	if (theBoard[curr.x()][curr.y()]->getPiece()->getColour() != currPlayerColour) {
-		cerr << "You tried to move an opponents piece" << endl;
+		//cerr << "You tried to move an opponents piece" << endl;
 		return false;
 	}
 
 	// checks move orientation based on piece and dest is in bounds of boards
 	if (!(theBoard[curr.x()][curr.y()]->getPiece()->isMovePossible(dest))) {
-		cerr << "You tried to make a invalid move for the piece type" << endl;
+		//cerr << "You tried to make a invalid move for the piece type" << endl;
 		return false;
 	}
 
 	// check if colour piece on dest and curr are same
 	if (theBoard[dest.x()][dest.y()]->getPiece() == nullptr) {
 	} else if (theBoard[curr.x()][curr.y()]->getPiece()->getColour() == theBoard[dest.x()][dest.y()]->getPiece()->getColour()) {
-		cerr << "You tried to capture your own piece" << endl;
+		//cerr << "You tried to capture your own piece" << endl;
 		return false;
 	}
 	// check for obstacle
 	if (!singlePathBlockCheck(curr, dest)) {
-		cerr << "The path to that cell is blocked" << endl;
+		//cerr << "The path to that cell is blocked" << endl;
 		return false;
 	}
 	return true;
@@ -513,7 +513,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 				isWhiteMove = !isWhiteMove;
 				theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
 				theBoard[curr.x()][curr.y()]->setPiece(king);
-				cerr << "King moved into check by xy: " << blackPieces[i]->getPos().x() << blackPieces[i]->getPos().y() << endl;
+				//cerr << "King moved into check by xy: " << blackPieces[i]->getPos().x() << blackPieces[i]->getPos().y() << endl;
 				return false;
 			}
 		}
@@ -524,7 +524,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 				isWhiteMove = !isWhiteMove;
 				theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
 				theBoard[curr.x()][curr.y()]->setPiece(king);
-				cerr << "White King moved into check by xy: " << whitePieces[i]->getPos().x() << whitePieces[i]->getPos().y() << endl;
+				//cerr << "White King moved into check by xy: " << whitePieces[i]->getPos().x() << whitePieces[i]->getPos().y() << endl;
 				return false;
 			}
 		}
@@ -571,16 +571,6 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 	checkForCheck(checkMateType);
 	checkForMate(checkMateType);
 	if (wasChecked && !stateUpdated) status = State::Normal;
-	cout << "was checked: " << wasChecked << endl;
-	cout << "stateUpdated: " << stateUpdated << endl;
-	// update Evaluation Score
-	string s = "other";
-	if (status == State::Check) {
-		s = "check!";
-	} else if (status == State::Normal) {
-		s = "normal...";
-	}
-	if (checkMateType) cout << "Status: " << s << endl;
 	return true;
 }
 
@@ -600,7 +590,7 @@ bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, boo
 	bool valid = updateState();
 	if (!valid) {
 		undo();	 // !!! fix undo
-		cerr << "You entered into an invalid state from that ENPASSANT move" << endl;
+		//cerr << "You entered into an invalid state from that ENPASSANT move" << endl;
 		return false;
 	}
 	// if valid cature the other pawn return true
@@ -623,14 +613,6 @@ bool Board::enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, boo
 	checkForCheck(checkMateType);
 	checkForMate(checkMateType);
 	if (wasChecked && !stateUpdated) status = State::Normal;
-	// update Evaluation Score
-	string s = "other";
-	if (status == State::Check) {
-		s = "check!";
-	} else if (status == State::Normal) {
-		s = "normal...";
-	}
-	if (checkMateType) cout << "Status: " << s << endl;
 	return true;
 }
 
@@ -645,7 +627,7 @@ bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
     if (!valid)
     {
         undo(); // !!! fix undo
-        cerr << "You entered into an invalid state from that PROMOTION move" << endl;
+        //cerr << "You entered into an invalid state from that PROMOTION move" << endl;
         return false;
     }
     // if valid capture the other pawn return true
@@ -700,14 +682,6 @@ bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
 	checkForCheck(checkMateType);
 	checkForMate(checkMateType);
 	if (wasChecked && !stateUpdated) status = State::Normal;
-	// update Evaluation Score
-	string s = "other";
-	if (status == State::Check) {
-		s = "check!";
-	} else if (status == State::Normal) {
-		s = "normal...";
-	}
-	if (checkMateType) cout << "Status: " << s << endl;
 	return true;
 }
 
@@ -720,7 +694,7 @@ void Board::checkForCheck(bool checkMateType) {
 				if (piecesAttackingWhiteKing[i]->getPiece() && piecesAttackingWhiteKing[i]->getPiece()->getPieceType() == PieceType::Pawn && (piecesAttackingWhiteKing[i]->getCoordinate() - whiteKing->getCoordinate()).x() == 0) continue;
 				status = State::Check;
 				stateUpdated = true;
-				cerr << "Discovered CHECK!!!" << endl;
+				//cerr << "Discovered CHECK!!!" << endl;
 				break;
 			}
 		}
@@ -732,7 +706,7 @@ void Board::checkForCheck(bool checkMateType) {
 				if (piecesAttackingBlackKing[i]->getPiece() && piecesAttackingBlackKing[i]->getPiece()->getPieceType() == PieceType::Pawn && (piecesAttackingBlackKing[i]->getCoordinate() - blackKing->getCoordinate()).x() == 0) continue;
 				status = State::Check;
 				stateUpdated = true;
-				cerr << "Discovered CHECK!!!" << endl;
+				//cerr << "Discovered CHECK!!!" << endl;
 				break;
 			}
 		}
@@ -811,7 +785,7 @@ bool Board::move(Coord curr, Coord dest, bool checkMateType) {
 	// check the state
 	if (!valid) {
 		undo();	 // !!! fix undo
-		cerr << "You entered into an invalid state from that move" << endl;
+		//cerr << "You entered into an invalid state from that move" << endl;
 		return false;
 	}
 	// detatch all cell observers at c and dest
@@ -837,29 +811,7 @@ bool Board::move(Coord curr, Coord dest, bool checkMateType) {
 
 	// block check into check
 	if (wasChecked && !stateUpdated) {
-		cout << "HERRERERER!" << endl;
 		status = State::Normal;
-	}
-
-	string s = "other";
-	if (status == State::Check) {
-		s = "check!";
-	} else if (status == State::Normal) {
-		s = "normal...";
-	}
-	if (checkMateType) cout << "Status: " << s << endl;
-	if (checkMateType) {
-		cout << "Pieces attacking black king are" << endl;
-		for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
-			cout << "xy: " << piecesAttackingBlackKing[i]->getCoordinate().x() << piecesAttackingBlackKing[i]->getCoordinate().y() << endl;
-		}
-		cout << "Pieces attacking white king are" << endl;
-		for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
-			cout << "xy: " << piecesAttackingWhiteKing[i]->getCoordinate().x() << piecesAttackingWhiteKing[i]->getCoordinate().y() << endl;
-		}
-	}
-	if (undoInfo.originalEndPiece != nullptr && checkMateType) {
-		cout << "THIS IS THE PIECE: " << pieceToStr(undoInfo.originalEndPiece->getPieceType()) << endl;
 	}
 	return true;
 }
@@ -939,14 +891,6 @@ bool Board::shortCastle(bool checkMateType) {
 	checkForCheck(checkMateType);
 	checkForMate(checkMateType);
 	if (wasChecked && !stateUpdated) status = State::Normal;
-	// update Evaluation Score
-	string s = "other";
-	if (status == State::Check) {
-		s = "check!";
-	} else if (status == State::Normal) {
-		s = "normal...";
-	}
-	if (checkMateType) cout << "Status: " << s << endl;
 	return true;
 }
 
@@ -1025,14 +969,6 @@ bool Board::longCastle(bool checkMateType) {
 	checkForCheck(checkMateType);
 	checkForMate(checkMateType);
 	if (wasChecked && !stateUpdated) status = State::Normal;
-	// update Evaluation Score
-	string s = "other";
-	if (status == State::Check) {
-		s = "check!";
-	} else if (status == State::Normal) {
-		s = "normal...";
-	}
-	if (checkMateType) cout << "Status: " << s << endl;
 	return true;
 }
 
@@ -1075,7 +1011,7 @@ void Board::updateCellObservers(Coord curr, Coord dest, bool checkMateType) {
 				if (isPossibleMove(dest, targetCell->getCoordinate(), col2) && checkMateType) {
 					stateUpdated = true;
 					status = State::Check;	// the move caused an actual check
-					cerr << "CHECK!!! LLLL" << endl;
+					//cerr << "CHECK!!! LLLL" << endl;
 				}
 				isWhiteMove = !isWhiteMove;
 
@@ -1105,7 +1041,6 @@ std::vector<std::vector<Coord>> Board::validMoves() {
 					for (size_t c = 0; c < piecePossibleMoves[r].size(); ++c) {
 						vector<Coord> pair = {whitePieces[i]->getPos(), piecePossibleMoves[r][c]};
 						allValidMoves.emplace_back(pair);
-						cout << "L";
 					}
 				}
 			}
@@ -1119,7 +1054,6 @@ std::vector<std::vector<Coord>> Board::validMoves() {
 					for (size_t c = 0; c < piecePossibleMoves[r].size(); ++c) {
 						vector<Coord> pair = {blackPieces[i]->getPos(), piecePossibleMoves[r][c]};
 						allValidMoves.emplace_back(pair);
-						cout << "L";
 					}
 				}
 			}
@@ -1171,18 +1105,6 @@ bool Board::singlePathBlockCheck(Coord curr, Coord dest) {
 	return false;
 }
 
-void Board::printActualBoard() {
-	for (int r = 0; r < boardSize; ++r) {
-		for (int c = 0; c < boardSize; ++c) {
-			if (theBoard[r][c]->getPiece())
-				cout << pieceToStr(theBoard[r][c]->getPiece()->getPieceType());
-			else
-				cout << "_";
-			cout << " ";
-		}
-		cout << endl;
-	}
-}
 
 // overload for testing
 
