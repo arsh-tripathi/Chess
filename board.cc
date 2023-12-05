@@ -408,10 +408,11 @@ bool Board::setupCheck() {
 
     bool noCheck = true;
 
-    updatePiecesattackingKing(Colour::Black);
-    updatePiecesattackingKing(Colour::White);
+
+
 
     if(whiteKing) {
+        updatePiecesattackingKing(Colour::White);
         for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
             if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate(), Colour::Black)) {
                 noCheck = false;
@@ -421,6 +422,7 @@ bool Board::setupCheck() {
     }
 
     if(blackKing) {
+        updatePiecesattackingKing(Colour::Black);
         for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
             if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate(), Colour::White)) {
                 noCheck = false;
