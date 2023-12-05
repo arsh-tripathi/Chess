@@ -19,6 +19,7 @@
 
 using namespace std;
 
+// pieceTypeToPoints is used for evaluation score and converts a piece to its associated points
 int pieceTypeToPoints(PieceType pt) {
 	switch (pt) {
 		case PieceType::Queen:
@@ -36,9 +37,6 @@ int pieceTypeToPoints(PieceType pt) {
 	}
 }
 
-shared_ptr<Cell> Board::getCell(Coord c) { return theBoard[c.x()][c.y()]; }
-Piece *Board::getPiece(Coord c) { return getCell(c)->getPiece(); }
-
 void Board::undo() {   
     // update Evaluation Score
     evalScore = undoInfo.previousEvalScore;
@@ -52,8 +50,10 @@ void Board::undo() {
         Colour col = theBoard[undoInfo.end.x()][undoInfo.end.y()]->getPiece()->getColour();
         if (col == Colour::White) {
             whiteKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
+			updatePiecesattackingKing(Colour::White);
         } else {
             blackKing = theBoard[undoInfo.start.x()][undoInfo.start.y()];
+			updatePiecesattackingKing(Colour::Black);
         }
     }
     if (undoInfo.enPassant) {
@@ -69,7 +69,7 @@ void Board::undo() {
     theBoard[undoInfo.end.x()][undoInfo.end.y()]->notifyDisplayObservers(*theBoard[undoInfo.start.x()][undoInfo.start.y()]);
 }
 
-Board::Board() : td{make_shared<TextDisplay>()}, xw{Xwindow{700, 700}} {
+Board::Board() : xw{Xwindow{700, 700}}, td{make_shared<TextDisplay>()} {
 	gd = make_shared<GraphicsDisplay>(xw, td);
 
 	// initialize theBoard by adding 8 x 8 grid of shared_ptr<Cell> with nullptr
@@ -83,8 +83,6 @@ Board::Board() : td{make_shared<TextDisplay>()}, xw{Xwindow{700, 700}} {
 }
 
 Board::~Board() {}
-
-int Board::getEvalScore() { return evalScore; }
 
 void Board::removePiece(Coord coord) {
 
@@ -129,13 +127,11 @@ void Board::removePiece(Coord coord) {
 }
 
 bool Board::placedKings() {
-
     if(whiteKing && blackKing) {
         return true;
     } else {
         return false;
     }
-
 }
 
 bool Board::noPromoPawns() {
@@ -387,12 +383,6 @@ void Board::updatePiecesattackingKing(const Colour col) {
 	}
 }
 
-void Board::setWhiteTurn(bool white) { 
-	isWhiteMove = white; 
-	gd->setWhiteTurn(white);	
-}
-
-bool Board::isWhiteTurn() { return isWhiteMove; }
 
 bool Board::isPossibleMove(Coord curr, Coord dest, Colour c) {
 	
@@ -480,8 +470,9 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 		if (checkMateType) {
 			piecesAttackingWhiteKing.clear();
 			for (size_t i = 0; i < blackPieces.size(); ++i) {
-				if (blackPieces[i]->isMovePossible(dest))
+				if (blackPieces[i]->isMovePossible(dest)) {
 					piecesAttackingWhiteKing.emplace_back(theBoard[blackPieces[i]->getPos().x()][blackPieces[i]->getPos().y()]);
+				}
 			}
 		}
 	} else {
@@ -489,8 +480,9 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 		if (checkMateType) {
 			piecesAttackingBlackKing.clear();
 			for (size_t i = 0; i < whitePieces.size(); ++i) {
-				if (whitePieces[i]->isMovePossible(dest))
+				if (whitePieces[i]->isMovePossible(dest)) {
 					piecesAttackingBlackKing.emplace_back(theBoard[whitePieces[i]->getPos().x()][whitePieces[i]->getPos().y()]);
+				}
 			}
 		}
 	}
@@ -957,8 +949,6 @@ void Board::updateCellObservers(Coord curr, Coord dest, bool checkMateType) {
 	}
 }
 
-State Board::getState() { return status; }
-
 std::vector<std::vector<Coord>> Board::validMoves() {
 	// return format {{Coord {}, Coord{}}, ...,{Coord {}, Coord{}}}
 
@@ -1016,11 +1006,6 @@ std::vector<std::vector<Coord>> Board::validMoves() {
 	return allValidMoves;
 }
 
-std::vector<std::shared_ptr<Cell>> Board::pathBlock(Coord curr) {
-	vector<shared_ptr<Cell>> errorremover;
-	return errorremover;
-}
-
 bool Board::singlePathBlockCheck(Coord curr, Coord dest) {
 	auto pmoves = theBoard[curr.x()][curr.y()]->getPiece()->possibleMoves();
 	for (size_t r = 0; r < pmoves.size(); ++r) {
@@ -1033,6 +1018,17 @@ bool Board::singlePathBlockCheck(Coord curr, Coord dest) {
 	}
 	return false;
 }
+
+// setter and getters
+int Board::getEvalScore() { return evalScore; }
+shared_ptr<Cell> Board::getCell(Coord c) { return theBoard[c.x()][c.y()]; }
+Piece *Board::getPiece(Coord c) { return getCell(c)->getPiece(); }
+State Board::getState() { return status; }
+void Board::setWhiteTurn(bool white) { 
+	isWhiteMove = white; 
+	gd->setWhiteTurn(white);	
+}
+bool Board::isWhiteTurn() { return isWhiteMove; }
 
 std::ostream &operator<<(std::ostream &out, const Board &b) {
 	out << *(b.td);
