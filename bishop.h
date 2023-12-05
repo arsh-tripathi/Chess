@@ -9,11 +9,11 @@ class Bishop : public Piece
 {
 
   public:
-    // ctor/dtor
+    // ctor and dtor
     Bishop(Coord pos, Colour colour);
     ~Bishop();
 
-    // methods
+    // overidden methods
     PieceType getPieceType() override;
     std::vector<std::vector<Coord>> possibleMoves() override;
     bool isMovePossible(Coord &c) override;

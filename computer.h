@@ -31,4 +31,5 @@ class LevelThree : public Player {
 //	bool move() override;
 //	void resign() override;
 //};
-#endif	// !DEBUG
+
+#endif

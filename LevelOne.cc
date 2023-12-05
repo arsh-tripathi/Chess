@@ -15,7 +15,7 @@ bool LevelOne::move() {
 		//cerr << "There are no valid moves for the AI, did not detect mate properly" << endl;
 		return false;
 	}
-	// Pick Random Move From validMoves and Move it
+	// pick random move From validMoves and make move
 	if (b->move(vmoves[0][0], vmoves[0][1])) {
 		bool whiteTurnParam = c == Colour::Black ? true : false;
 		b->gd->setWhiteTurn(whiteTurnParam);

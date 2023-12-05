@@ -21,12 +21,13 @@ bool LevelThree::move() {
 		//cerr << "Valid moves is empty for computer" << endl;
 		return false;
 	}
+
 	// loop through all possible responses by oponent
 	for (size_t i = 0; i < vmoves.size(); ++i) {
 		if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
 		evalTree.addChild(b->getEvalScore(), vmoves[i]);
 		undoinfos.emplace_back(b->undoInfo);
-		if (b->getState() != State::Checkmate || b->getState() != State::Stalement) {
+		if (b->getState() != State::Checkmate || b->getState() != State::Stalemate) {
 			vector<vector<Coord>> childvmoves = b->validMoves();
 			for (size_t j = 0; j < childvmoves.size(); ++j) {
 				if (!b->move(childvmoves[j][0], childvmoves[j][1])) continue;
@@ -48,6 +49,7 @@ bool LevelThree::move() {
 	b->move(finalmove[0], finalmove[1]);
 	bool whiteTurnParam = c == Colour::Black ? true : false;
 	b->gd->setWhiteTurn(whiteTurnParam);
+	
 	return true;
 }
 

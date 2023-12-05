@@ -9,7 +9,7 @@
 
 using namespace std;
 
-bool isValidSquare(string square) { // takes e7 or h4
+bool isValidSquare(string square) {
     char x;
     int y;
     string dump;
@@ -71,23 +71,23 @@ int main(void) {
     float whitePlayer = 0;
     float blackPlayer = 0;
 
-    while(!cin.eof()) { // large game loop
-        Board b; // start fresh with new board
+    while(!cin.eof()) {
+        Board b; // create new board
 
 		b.updateGraphicsDisplayScore(whitePlayer, blackPlayer);
 
         bool custom = false;
 
-        string cmd; // either set up, game something something, or quit
+        string cmd; // "setup" or "game white-player black-player"
 
         while(cin >> cmd) { 
 
-            if(cmd == "setup") { // SET UP
+            if(cmd == "setup") { // setup mode
                 cout << "Entering Setup Mode..." << endl;
-                string setUpLine;     // actual cmd
+                string setUpLine;
 
                 custom = true;
-                string firstCmd; // either + 
+                string firstCmd; // "+" or "-" or "=" or "done"
                 while(cin >> firstCmd) {
                     getline(cin, setUpLine);
                     istringstream in{setUpLine};
@@ -220,9 +220,9 @@ int main(void) {
                         cerr << "Invalid Set Up Command" << endl;                    
                     }
                 }
-            } else if (cmd == "game") { // GAME
+            } else if (cmd == "game") { // start a game
                 
-                string white, black; // CONTAINS EITHER HUMAN, COMPUTER[1], ETC.
+                string white, black; // "human" or "computer[1-4]"
 				shared_ptr<Player> p1 = nullptr;
 				shared_ptr<Player> p2 = nullptr;
 
@@ -236,8 +236,8 @@ int main(void) {
 					} else if (white == "computer[3]") {
 						p1 = make_shared<LevelThree>(Colour::White);
 					} else if (white == "computer[4]") {
-						// Currently NOT WORKING!!!
-						cerr << "Currently not supported!" << endl;
+						// currently not supported
+						cerr << "Computer[4] is currently not supported" << endl;
 						p1 = make_shared<LevelThree>(Colour::White);
 					} else {
 						cerr << "Invalid Type of Player!" << endl;
@@ -253,8 +253,8 @@ int main(void) {
 					} else if (black == "computer[3]") {
 						p2 = make_shared<LevelThree>(Colour::Black);
 					} else if (black == "computer[4]") {
-						// Currently NOT WORKING!!!
-						cerr << "Currently not supported!" << endl;
+						// currently not supported
+						cerr << "Computer[4] is currently not supported" << endl;
 						p2 = make_shared<LevelThree>(Colour::Black);
 					} else {
 						cerr << "Invalid Type of Player!" << endl;
@@ -263,8 +263,7 @@ int main(void) {
 					if (p1 != nullptr && p2 != nullptr) break;
 				}
 
-                // ** FILL IN WITH CREATING COMPUTER OR HUMAN OBJS **
-
+                // check if custom board was setup
                 if(!custom) {
                     b.setupDefaultBoard();
                 }
@@ -274,12 +273,12 @@ int main(void) {
 
                 cout << b;
                 
-                string firstCmd; // either resign or move 
+                string firstCmd; // "resign" or "move" 
                 while(cin >> firstCmd) {
 
                     if(firstCmd == "resign") {
                         if(b.isWhiteTurn()) {
-                            p1->resign(); // doesn't change isWhiteMove
+                            p1->resign();
                         } else {
                             p2->resign();
                         }
@@ -337,7 +336,7 @@ int main(void) {
 
                         break;
                     }
-                    if(b.getState() == State::Stalement) {
+                    if(b.getState() == State::Stalemate) {
                         whitePlayer = whitePlayer + 0.5;
                         blackPlayer = blackPlayer + 0.5;
                         cout << "Stalemate!" << endl;                    
@@ -346,7 +345,7 @@ int main(void) {
                 }
                 break;
 
-            } else { // didn't enter setup game or quit
+            } else {
                 cerr << "Enter Valid Command" << endl;
             }
         }

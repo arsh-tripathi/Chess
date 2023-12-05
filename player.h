@@ -17,12 +17,11 @@ class Player {
         virtual bool move() = 0;
         virtual void resign() = 0;        
 
-        // set
+        // setter
         void setBoard(Board * playingBoard) {
             b = playingBoard;
         }
 
 };
-
 
 #endif

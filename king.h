@@ -9,7 +9,7 @@ class King : public Piece
 {
 
   public:
-    // ctor/dtor
+    // ctor and dtor
     King(Coord pos, Colour colour);
     ~King();
 
@@ -17,12 +17,6 @@ class King : public Piece
     PieceType getPieceType() override;
     std::vector<std::vector<Coord>> possibleMoves() override;
     bool isMovePossible(Coord &c) override;
-
-    // for testing of pieces
-    void setMoveCounter(int moves)
-    {
-        moveCounter = moves;
-    }
 };
 
 #endif

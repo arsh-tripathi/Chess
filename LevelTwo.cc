@@ -18,7 +18,7 @@ bool LevelTwo::move() {
 	}
 	Coord start{0, 0};
 	Coord end{0, 0};
-	// Search through all moves and find move that results in best eval score after 1 move
+	// search through all moves and find move that results in best eval score after 1 move
 	int maxeval = -1000;
 	int mineval = 1000;
 	for (size_t i = 0; i < vmoves.size(); ++i) {
@@ -40,12 +40,14 @@ bool LevelTwo::move() {
 			b->undo();
 		}
 	}
-	// Make Move
+	// make move
 	b->undoInfo = original;
 	b->move(start, end);
-	// Updates Turn on Graphics Display
+
+	// updates Turn on graphics display
 	bool whiteTurnParam = c == Colour::Black ? true : false;
 	b->gd->setWhiteTurn(whiteTurnParam);
+	
 	return true;
 }
 
