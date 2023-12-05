@@ -24,10 +24,8 @@ class LevelThree : public Player {
 	LevelThree(Colour c);
 	bool move() override;
 	void resign() override;
-	friend std::ostream& operator<<(std::ostream& out, Tree& evalTree);
 };
 
-std::ostream& operator<<(std::ostream& out, Tree& evalTree);
 // class LevelFour : public Player {
 //   public:
 //	LevelFour(Colour c);

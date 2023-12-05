@@ -38,7 +38,6 @@ bool LevelThree::move() {
 		undoinfos.pop_back();
 		b->undo();
 	}
-	cout << evalTree;
 
 	b->undoInfo = undoinfos[undoinfos.size() - 1];
 	undoinfos.pop_back();
@@ -54,11 +53,3 @@ bool LevelThree::move() {
 
 void LevelThree::resign() { b->status = State::Resign; }
 
-ostream& operator<<(ostream& out, Tree& evalTree) {
-	out << "[";
-	out << evalTree.evalScore;
-	for (size_t i = 0; i < evalTree.children.size(); ++i) {
-		out << evalTree.children[i];
-	} 
-	out << "]" << endl;
-}
