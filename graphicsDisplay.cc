@@ -50,7 +50,7 @@ void GraphicsDisplay::drawBoard() {
     for (int r = 0; r < boardSize; ++r) {
         for (int c = 0; c < boardSize; ++c) {
             if ((r + c) % 2 == 1) {
-                xw.fillRectangle(offsetX + c* recSize, offsetY + r*recSize, recSize, recSize, 0x154c79);
+                xw.fillRectangle(offsetX + c* recSize, offsetY + r*recSize, recSize, recSize, 0x779954);
             }
         }
     }
@@ -112,9 +112,9 @@ void GraphicsDisplay::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *sta
     int r = c.getCoordinate().x();
     int s = c.getCoordinate().y();
     if ((r + s) % 2 == 1) {
-        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize)- recSize - 4, recSize, recSize, 0xabdbe3);
+        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize)- recSize - 4, recSize, recSize, 0xE9EDCC);
     } else {
-        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize)- recSize - 4, recSize, recSize, 0x154c79);
+        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize)- recSize - 4, recSize, recSize, 0x779954);
     }
     if (c.getPiece() != nullptr) {
         int capitalLowerC = c.getPiece()->getColour() == Colour::White ? 0 : 32;
@@ -127,9 +127,9 @@ void GraphicsDisplay::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *sta
     r = dest.getCoordinate().x();
     s = dest.getCoordinate().y();
     if ((r + s) % 2 == 1) {
-        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize) - recSize - 4, recSize, recSize, 0xabdbe3);
+        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize) - recSize - 4, recSize, recSize, 0xE9EDCC);
     } else {
-        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize)- recSize - 4, recSize, recSize, 0x154c79);
+        xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + s*recSize)- recSize - 4, recSize, recSize, 0x779954);
     }
     if (dest.getPiece() != nullptr) {
         int capitalLowerDest = dest.getPiece()->getColour() == Colour::White ? 0 : 32;
@@ -147,16 +147,20 @@ void GraphicsDisplay::updateEntireBoard() {
         for (int c = 0; c < boardSize; ++c) {
             // cover tile
             if ((r + c) % 2 == 1) {
-                xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + c*recSize)- recSize - 4, recSize, recSize, 0xabdbe3);
+                xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + c*recSize)- recSize - 4, recSize, recSize, 0xE9EDCC);
             } else {
-                xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + c*recSize)- recSize - 4, recSize, recSize, 0x154c79);
+                xw.fillRectangle(offsetX + r* recSize, totalHeight - (offsetY + c*recSize)- recSize - 4, recSize, recSize, 0x779954);
             }
             // add piece
             if (td->pieceChar(r, c) != '_') {
                 string pieceStr;
                 pieceStr += td->pieceChar(r, c);
                 xw.drawString( offsetX + r * recSize + recSize / 2, totalHeight - (offsetY + c*recSize)- recSize/2, pieceStr);
-            }
+                // add hat for black pieces
+                if (97 <= td->pieceChar(r, c) && td->pieceChar(r, c) <= 122) { 
+                    xw.fillRectangle ( offsetX + r * recSize + recSize / 2, totalHeight - (offsetY + c*recSize)- recSize/2 + 4, 6, 1, 0x000000);
+                }
+            } 
         }
     }
 }
