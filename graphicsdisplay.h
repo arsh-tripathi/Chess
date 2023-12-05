@@ -27,7 +27,6 @@ class GraphicsDisplay: public Observer {
     const int offsetY = 100;
     int recSize = displaySize / boardSize;
 
-    void drawScore();
     void drawBoard();
 
     public:
@@ -39,7 +38,10 @@ class GraphicsDisplay: public Observer {
     SubscriptionType subType() override;
 
     void updateEntireBoard();
-    void updateScore(char win);
+    void updateScore(float whitePlayer, float blackPlayer);
+
+    void setWhiteTurn(bool white);
+    void drawScore();
 };
 
 ostream &operator<<(ostream &out, const GraphicsDisplay &gd);

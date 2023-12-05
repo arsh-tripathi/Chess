@@ -41,6 +41,8 @@ bool LevelTwo::move() {
 	}
 	b->undoInfo = original;
 	b->move(start, end);
+	bool whiteTurnParam = c == Colour::Black ? true : false;
+	b->gd->setWhiteTurn(whiteTurnParam);
 	return true;
 }
 

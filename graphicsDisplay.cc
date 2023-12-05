@@ -27,8 +27,13 @@ void GraphicsDisplay::drawScore() {
     oss2 << blackScore;
     string wPlayer = "White: " + oss.str();
     string bPlayer = "Black: " + oss2.str();
-    if (isWhiteTurn) xw.fillRectangle(offsetX - 5, offsetY / 2 - 12, 60, 15, 0xD8FB5A);
-    else xw.fillRectangle(offsetX - 5, 2 * offsetY / 3 - 12, 60, 15, 0xD8FB5A);
+    if (isWhiteTurn) { // highlight white turn
+        xw.fillRectangle(offsetX - 5, offsetY / 2 - 12, 60, 15, 0xD8FB5A);
+        xw.fillRectangle(offsetX - 5, 2 * offsetY / 3 - 12, 60, 15, 0xeeeee4);
+    } else { // highlight black turn
+        xw.fillRectangle(offsetX - 5, offsetY / 2 - 12, 60, 15, 0xeeeee4);
+        xw.fillRectangle(offsetX - 5, 2 * offsetY / 3 - 12, 60, 15, 0xD8FB5A);
+    }
     xw.drawString(offsetX, offsetY / 2, wPlayer);
     xw.drawString(offsetX, 2 * offsetY / 3, bPlayer);
 }
@@ -136,6 +141,8 @@ void GraphicsDisplay::notify(Cell &c, Cell &dest, UndoInfo *undoInfo, State *sta
 }
 
 void GraphicsDisplay::updateEntireBoard() {
+    drawScore();
+
     for (int r = 0; r < boardSize; ++r) {
         for (int c = 0; c < boardSize; ++c) {
             // cover tile
@@ -158,17 +165,11 @@ SubscriptionType GraphicsDisplay::subType() {
   return SubscriptionType::Graphics;
 }
 
-void GraphicsDisplay::updateScore(char win) {
-    switch (win) {
-        case 'w':
-            whiteScore += 1;
-            break;
-        case 'b':
-            whiteScore += 1;
-            break;
-        default:
-            whiteScore += 0.5;
-            blackScore += 0.5;
-            break;
-    }
+void GraphicsDisplay::updateScore(float whitePlayer, float blackPlayer) {
+    whiteScore = whitePlayer;
+    blackScore = blackPlayer;
+}
+
+void GraphicsDisplay::setWhiteTurn(bool white) {
+    isWhiteTurn = white;
 }

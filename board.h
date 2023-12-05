@@ -112,6 +112,8 @@ class Board {
   bool placedKings();
   bool noPromoPawns();
   bool setupCheck();
+
+  void updateGraphicsDisplayScore(float whitePlayer, float blackPlayer);
   
   void setWhiteTurn(bool white);
 	bool isWhiteTurn();

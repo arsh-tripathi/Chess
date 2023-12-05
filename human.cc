@@ -114,7 +114,8 @@ bool Human::move() {
     } else {
         return false;                                    
     } 
-
+    bool whiteTurnParam = c == Colour::Black ? true : false;
+	b->gd->setWhiteTurn(whiteTurnParam);
     return true;
 }
 

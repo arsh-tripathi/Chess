@@ -45,6 +45,8 @@ bool LevelThree::move() {
 	else
 		finalmove = evalTree.MinMax();
 	b->move(finalmove[0], finalmove[1]);
+	bool whiteTurnParam = c == Colour::Black ? true : false;
+	b->gd->setWhiteTurn(whiteTurnParam);
 	return true;
 }
 

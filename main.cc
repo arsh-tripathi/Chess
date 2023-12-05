@@ -2,6 +2,7 @@
 #include "coord.h"
 #include "player.h"
 #include "human.h"
+#include "computer.h"
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -72,6 +73,9 @@ int main(void) {
 
     while(!cin.eof()) { // large game loop
         Board b; // start fresh with new board
+
+		b.updateGraphicsDisplayScore(whitePlayer, blackPlayer);
+
         bool custom = false;
 
         string cmd; // either set up, game something something, or quit
@@ -201,10 +205,12 @@ int main(void) {
                         in >> colour;
                         if(colour == "White" || colour == "white") {
                             b.setWhiteTurn(true);
+							b.updateGraphicsDisplayScore(whitePlayer, blackPlayer);
                             cout << "White Will Go Next" << endl;
 
                         } else if(colour == "Black" || colour == "black") {
                             b.setWhiteTurn(false);
+							b.updateGraphicsDisplayScore(whitePlayer, blackPlayer);
                             cout << "Black Will Go Next" << endl;
 
                         } else {
@@ -217,13 +223,45 @@ int main(void) {
             } else if (cmd == "game") { // GAME
                 
                 string white, black; // CONTAINS EITHER HUMAN, COMPUTER[1], ETC.
-                cin >> white >> black;
+				shared_ptr<Player> p1 = nullptr;
+				shared_ptr<Player> p2 = nullptr;
 
+                while (cin >> white >> black) {
+					if (white == "human") {
+						p1 = make_shared<Human>(Colour::White);
+					} else if (white == "computer[1]") {
+						p1 = make_shared<LevelOne>(Colour::White);
+					} else if (white == "computer[2]") {
+						p1 = make_shared<LevelTwo>(Colour::White);
+					} else if (white == "computer[3]") {
+						p1 = make_shared<LevelThree>(Colour::White);
+					} else if (white == "computer[4]") {
+						// Currently NOT WORKING!!!
+						cerr << "Currently not supported!" << endl;
+						p1 = make_shared<LevelThree>(Colour::White);
+					} else {
+						cerr << "Invalid Type of Player!" << endl;
+						continue;
+					}
 
-                // ** FILL IN WITH CREATING COMPUTER OR HUMAN OBJS **
-
-                Human p1{Colour::White};
-                Human p2{Colour::Black};
+					if (black == "human") {
+						p2 = make_shared<Human>(Colour::Black);
+					} else if (black == "computer[1]") {
+						p2 = make_shared<LevelOne>(Colour::Black);
+					} else if (black == "computer[2]") {
+						p2 = make_shared<LevelTwo>(Colour::Black);
+					} else if (black == "computer[3]") {
+						p2 = make_shared<LevelThree>(Colour::Black);
+					} else if (black == "computer[4]") {
+						// Currently NOT WORKING!!!
+						cerr << "Currently not supported!" << endl;
+						p2 = make_shared<LevelThree>(Colour::Black);
+					} else {
+						cerr << "Invalid Type of Player!" << endl;
+						continue;
+					}
+					if (p1 != nullptr && p2 != nullptr) break;
+				}
 
                 // ** FILL IN WITH CREATING COMPUTER OR HUMAN OBJS **
 
@@ -231,8 +269,8 @@ int main(void) {
                     b.setupDefaultBoard();
                 }
 
-                p1.setBoard(&b);
-                p2.setBoard(&b);
+                p1->setBoard(&b);
+                p2->setBoard(&b);
 
                 cout << b;
                 
@@ -241,20 +279,20 @@ int main(void) {
 
                     if(firstCmd == "resign") {
                         if(b.isWhiteTurn()) {
-                            p1.resign(); // doesn't change isWhiteMove
+                            p1->resign(); // doesn't change isWhiteMove
                         } else {
-                            p2.resign();
+                            p2->resign();
                         }
                     } else if (firstCmd == "move") {
                         if(b.isWhiteTurn()) {
-                            if(p1.move()) {
+                            if(p1->move()) {
                                 cout << b;
                             } else {
                                 cerr << "Invalid Move" << endl;
                             }
 
                         } else {
-                            if(p2.move()) {
+                            if(p2->move()) {
                                 cout << b;
                             } else {
                                 cerr << "Invalid Move" << endl;
@@ -281,7 +319,7 @@ int main(void) {
                             blackPlayer = blackPlayer + 1;
                             cout << "Checkmate! Black wins!" << endl;    
                         } else {
-                            whitePlayer = whitePlayer + 1;    
+                            whitePlayer = whitePlayer + 1;
                             cout << "Checkmate! White wins!" << endl; 
                         }
 

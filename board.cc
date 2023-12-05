@@ -218,7 +218,8 @@ bool Board::setupCheck() {
 		updatePiecesattackingKing(Colour::White);
         for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
             if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate(), Colour::Black)) {
-                noCheck = false;
+				if (piecesAttackingWhiteKing[i]->getPiece() && piecesAttackingWhiteKing[i]->getPiece()->getPieceType() == PieceType::Pawn && (piecesAttackingWhiteKing[i]->getCoordinate() - whiteKing->getCoordinate()).x() == 0) continue;
+				noCheck = false;
                 break;
             }
         }
@@ -228,6 +229,7 @@ bool Board::setupCheck() {
 		updatePiecesattackingKing(Colour::Black);
         for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
             if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate(), Colour::White)) {
+				if (piecesAttackingBlackKing[i]->getPiece() && piecesAttackingBlackKing[i]->getPiece()->getPieceType() == PieceType::Pawn && (piecesAttackingBlackKing[i]->getCoordinate() - blackKing->getCoordinate()).x() == 0) continue;
                 noCheck = false;
                 break;
             }
@@ -262,6 +264,11 @@ void Board::updateEvalScore(Colour col, Piece *piece, State state) {
 		evalScore += score;
 	else
 		evalScore -= score;
+}
+
+void Board::updateGraphicsDisplayScore(float whitePlayer, float blackPlayer) {
+	gd->updateScore(whitePlayer, blackPlayer);
+	gd->drawScore();
 }
 
 // creates pieces (adds to blackpieces or whitepieces) and places raw pointer
@@ -439,7 +446,10 @@ void Board::updatePiecesattackingKing(const Colour col) {
 	}
 }
 
-void Board::setWhiteTurn(bool white) { isWhiteMove = white; }
+void Board::setWhiteTurn(bool white) { 
+	isWhiteMove = white; 
+	gd->setWhiteTurn(white);	
+}
 bool Board::isWhiteTurn() { return isWhiteMove; }
 
 void Board::toggleTurn() { isWhiteMove = !isWhiteMove; }
@@ -499,6 +509,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 	if (c == Colour::Black) {  // call isPossibleMove for all alive black pieces to dest
 		for (size_t i = 0; i < blackPieces.size(); ++i) {
 			if (isPossibleMove(blackPieces[i]->getPos(), dest, Colour::Black)) {
+				if (blackPieces[i]->getPieceType() == PieceType::Pawn && (blackPieces[i]->getPos() - dest).x() == 0) continue;
 				isWhiteMove = !isWhiteMove;
 				theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
 				theBoard[curr.x()][curr.y()]->setPiece(king);
@@ -509,6 +520,7 @@ bool Board::kingMove(Coord curr, Coord dest, bool checkMateType) {
 	} else {
 		for (size_t i = 0; i < whitePieces.size(); ++i) {
 			if (isPossibleMove(whitePieces[i]->getPos(), dest, Colour::White)) {
+				if (whitePieces[i]->getPieceType() == PieceType::Pawn && (whitePieces[i]->getPos() - dest).x() == 0) continue;
 				isWhiteMove = !isWhiteMove;
 				theBoard[dest.x()][dest.y()]->setPiece(tmpPiece);
 				theBoard[curr.x()][curr.y()]->setPiece(king);
@@ -628,7 +640,7 @@ bool Board::promotion(Coord curr, Coord dest, bool checkMateType)
     undoInfo.previousEvalScore = evalScore;
     theBoard[curr.x()][curr.y()]->move(*theBoard[dest.x()][dest.y()], &undoInfo, &status);
     isWhiteMove = !isWhiteMove;
-    // check invalidity if invald undo and return false
+    // check invalidity if invald nd return false
     bool valid = updateState();
     if (!valid)
     {
@@ -705,6 +717,7 @@ void Board::checkForCheck(bool checkMateType) {
 		isWhiteMove = !isWhiteMove;
 		for (size_t i = 0; i < piecesAttackingWhiteKing.size(); ++i) {
 			if (isPossibleMove(piecesAttackingWhiteKing[i]->getCoordinate(), whiteKing->getCoordinate(), Colour::Black)) {
+				if (piecesAttackingWhiteKing[i]->getPiece() && piecesAttackingWhiteKing[i]->getPiece()->getPieceType() == PieceType::Pawn && (piecesAttackingWhiteKing[i]->getCoordinate() - whiteKing->getCoordinate()).x() == 0) continue;
 				status = State::Check;
 				stateUpdated = true;
 				cerr << "Discovered CHECK!!!" << endl;
@@ -716,6 +729,7 @@ void Board::checkForCheck(bool checkMateType) {
 		isWhiteMove = !isWhiteMove;
 		for (size_t i = 0; i < piecesAttackingBlackKing.size(); ++i) {
 			if (isPossibleMove(piecesAttackingBlackKing[i]->getCoordinate(), blackKing->getCoordinate(), Colour::White)) {
+				if (piecesAttackingBlackKing[i]->getPiece() && piecesAttackingBlackKing[i]->getPiece()->getPieceType() == PieceType::Pawn && (piecesAttackingBlackKing[i]->getCoordinate() - blackKing->getCoordinate()).x() == 0) continue;
 				status = State::Check;
 				stateUpdated = true;
 				cerr << "Discovered CHECK!!!" << endl;
