@@ -29,6 +29,8 @@ using namespace std;
 
 class Board {
 	// fields
+  std::vector<std::vector<Coord>> previousValidMoves;
+
 	UndoInfo undoInfo;
 	std::vector<unique_ptr<Piece>> whitePieces;
 	std::vector<unique_ptr<Piece>> blackPieces;

@@ -260,10 +260,8 @@ void Board::updateEvalScore(Colour col, Piece *piece, State state) {
 	if (piece != nullptr) {
 		score += pieceTypeToPoints(piece->getPieceType());
 	}
-	if (col == Colour::White)
-		evalScore += score;
-	else
-		evalScore -= score;
+	if (col == Colour::White) evalScore += score;
+	else evalScore -= score;
 }
 
 void Board::updateGraphicsDisplayScore(float whitePlayer, float blackPlayer) {
@@ -296,7 +294,8 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
     } else if (pt == PieceType::King) {
         if (colour == Colour::White) {   
             if (whiteKing) {
-                //cerr << "Error: cannot place two kings" << endl;
+                cerr << "Error: cannot place two kings" << endl;
+				return;
             } else {    
                 nPiece = make_unique<King>(coord, colour);
                 whiteKing = theBoard[coord.x()][coord.y()];
@@ -304,7 +303,8 @@ void Board::placePiece(Colour colour, Coord coord, PieceType pt)
         }
         else {
             if (blackKing) {
-                //cerr << "Error: cannot place two kings" << endl;
+                cerr << "Error: cannot place two kings" << endl;
+				return;
             } else {    
                 nPiece = make_unique<King>(coord, colour);
                 blackKing = theBoard[coord.x()][coord.y()];
@@ -720,11 +720,10 @@ void Board::checkForMate(bool checkMateType) {
 	UndoInfo og = undoInfo;
 	if (!checkMateType) return;
 	if (status == State::Check) {  // check for possible checkmate
-		if (isWhiteMove)
-			evalScore -= 1;
-		else
-			evalScore += 1;
-		if (validMoves().size() == 0) {
+		if (isWhiteMove) evalScore -= 1;
+		else evalScore += 1;
+		previousValidMoves = validMoves();
+		if (previousValidMoves.size() == 0) {
 			stateUpdated = true;
 			status = State::Checkmate;
 			if (isWhiteMove)
@@ -734,7 +733,8 @@ void Board::checkForMate(bool checkMateType) {
 			return;
 		}
 	} else {  // check for possible stalemate
-		if (validMoves().size() == 0) {
+		previousValidMoves = validMoves();
+		if (previousValidMoves.size() == 0) {
 			stateUpdated = true;
 			status = State::Stalement;
 			return;

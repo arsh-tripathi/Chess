@@ -35,7 +35,7 @@ struct Tree {
 		int maxscore = -1000;
 		shared_ptr<Tree> child;
 		for (size_t i = 0; i < children.size(); ++i) {
-			int calcscore = children[i]->findMaxEval();
+			int calcscore = children[i]->findMinEval();
 			if (maxscore < calcscore) {
 				maxscore = calcscore;
 				child = children[i];
@@ -48,7 +48,7 @@ struct Tree {
 		int minscore = 1000;
 		shared_ptr<Tree> child;
 		for (size_t i = 0; i < children.size(); ++i) {
-			int calcscore = children[i]->findMinEval();
+			int calcscore = children[i]->findMaxEval();
 			if (minscore > calcscore) {
 				minscore = calcscore;
 				child = children[i];

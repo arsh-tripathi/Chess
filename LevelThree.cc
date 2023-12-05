@@ -5,7 +5,6 @@
 #include "coord.h"
 #include "enums.h"
 #include "player.h"
-#include "tree.h"
 #include "undoInfo.h"
 
 using namespace std;
@@ -38,13 +37,13 @@ bool LevelThree::move() {
 		undoinfos.pop_back();
 		b->undo();
 	}
+	cout << evalTree;
+
 	b->undoInfo = undoinfos[undoinfos.size() - 1];
 	undoinfos.pop_back();
 	vector<Coord> finalmove;
-	if (b->isWhiteTurn())
-		finalmove = evalTree.MaxMin();
-	else
-		finalmove = evalTree.MinMax();
+	if (b->isWhiteTurn()) finalmove = evalTree.MaxMin();
+	else finalmove = evalTree.MinMax();
 	b->move(finalmove[0], finalmove[1]);
 	bool whiteTurnParam = c == Colour::Black ? true : false;
 	b->gd->setWhiteTurn(whiteTurnParam);
@@ -52,3 +51,12 @@ bool LevelThree::move() {
 }
 
 void LevelThree::resign() { b->status = State::Resign; }
+
+ostream& operator<<(ostream& out, Tree& evalTree) {
+	out << "[";
+	out << evalTree.evalScore;
+	for (size_t i = 0; i < evalTree.children.size(); ++i) {
+		out << evalTree.children[i];
+	} 
+	out << "]" << endl;
+}

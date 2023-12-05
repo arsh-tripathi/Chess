@@ -31,7 +31,7 @@ bool LevelTwo::move() {
 			}
 			b->undo();
 		} else {
-			if (b->move(vmoves[i][0], vmoves[i][1])) continue;
+			if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
 			if (mineval > b->getEvalScore()) {
 				mineval = b->getEvalScore();
 				start = vmoves[i][0];
