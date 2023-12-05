@@ -34,4 +34,5 @@ std::ostream& operator<<(std::ostream& out, Tree& evalTree);
 //	bool move() override;
 //	void resign() override;
 //};
-#endif	// !DEBUG
+
+#endif

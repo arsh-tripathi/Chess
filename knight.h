@@ -9,7 +9,7 @@ class Knight : public Piece
 {
 
   public:
-    // ctor/dtor
+    // ctor and dtor
     Knight(Coord pos, Colour colour);
     ~Knight();
 

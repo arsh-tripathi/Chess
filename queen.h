@@ -9,7 +9,7 @@ class Queen : public Piece
 {
 
   public:
-    // ctor/dtor
+    // ctor and dtor
     Queen(Coord pos, Colour colour);
     ~Queen();
 

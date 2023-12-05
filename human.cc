@@ -4,6 +4,8 @@
 #include <sstream>
 #include <string>
 
+using namespace std;
+
 bool isValidSquare1(string square) {
     char x;
     int y;
@@ -59,8 +61,6 @@ Coord convertToCoord1(string square) {
 
     return Coord{x, y - 1};
 }
-
-using namespace std;
 
 Human::Human(Colour c) : Player{c} {}
 

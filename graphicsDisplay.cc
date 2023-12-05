@@ -54,11 +54,12 @@ void GraphicsDisplay::drawBoard() {
             }
         }
     }
+
     int borderLen = displaySize - 4;
     xw.fillRectangle(offsetX - 3, offsetY - 2, borderLen + 4, 3, 0x000000); // top horizontal
-    xw.fillRectangle(offsetX - 3, offsetY + borderLen, borderLen + 3, 3, 0x000000); // bot horizontal
-    xw.fillRectangle(offsetX - 3, offsetY, 3, borderLen + 3, 0x000000); // left vert
-    xw.fillRectangle(offsetX + borderLen, offsetY, 3, borderLen + 3, 0x000000); // right vert
+    xw.fillRectangle(offsetX - 3, offsetY + borderLen, borderLen + 3, 3, 0x000000); // bottom horizontal
+    xw.fillRectangle(offsetX - 3, offsetY, 3, borderLen + 3, 0x000000); // left vertical
+    xw.fillRectangle(offsetX + borderLen, offsetY, 3, borderLen + 3, 0x000000); // right vertical
 
     // 1 , 2 , 3 ... 8
     for (int i = boardSize; i >= 1; --i) {
@@ -66,6 +67,7 @@ void GraphicsDisplay::drawBoard() {
         oss << i;
         xw.drawString(offsetX/2, offsetY + (boardSize - i) * recSize + recSize / 2, oss.str()); 
     }
+
     // A , B , C ... H
     for (int i = 1; i <= boardSize; ++i) {
         string s;
@@ -154,7 +156,7 @@ void GraphicsDisplay::updateEntireBoard() {
                 string pieceStr;
                 pieceStr += td->pieceChar(r, c);
                 xw.drawString( offsetX + r * recSize + recSize / 2, totalHeight - (offsetY + c*recSize)- recSize/2, pieceStr);
-                // add hat for black pieces
+                // add marker for black pieces to distinguish them
                 if (97 <= td->pieceChar(r, c) && td->pieceChar(r, c) <= 122) { 
                     xw.fillRectangle ( offsetX + r * recSize + recSize / 2, totalHeight - (offsetY + c*recSize)- recSize/2 + 4, 6, 1, 0x000000);
                 }

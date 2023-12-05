@@ -6,27 +6,21 @@
 
 using namespace std;
 
-// DELETE FURTHER MOVES WE WILL HANDLE IT IN BOARD
 static const vector<vector<Coord>> FIRSTMOVES{{{0, 1}}, {{1, 1}}, {{1, 0}}, {{1, -1}},
                                                 {{0, -1}}, {{-1, -1}}, {{-1, 0}}, {{-1, 1}}};
 static const vector<vector<Coord>> FURTHERMOVES{{{0, 1}}, {{1, 1}}, {{1, 0}}, {{1, -1}},
                                                 {{0, -1}}, {{-1, -1}}, {{-1, 0}}, {{-1, 1}}};
 
-King::King(Coord pos, Colour colour) : Piece{pos, colour}
-{
-}
+King::King(Coord pos, Colour colour) : Piece{pos, colour} {}
 
-King::~King()
-{
-}
+King::~King() {}
 
-PieceType King::getPieceType()
-{
+PieceType King::getPieceType() {
     return PieceType::King;
 }
 
-vector<vector<Coord>> King::possibleMoves()
-{
+vector<vector<Coord>> King::possibleMoves() {
+
     Coord c{0, 0};
     vector<vector<Coord>> moves;
     if (!moveCounter)
@@ -64,11 +58,10 @@ vector<vector<Coord>> King::possibleMoves()
     return moves;
 }
 
-bool King::isMovePossible(Coord &c)
-{
+bool King::isMovePossible(Coord &c) {
     if (!c.checkBounds())
     {
-        // final destination is out of bouinds
+        // final destination is out of bounds
         return false;
     }
     Coord d{0, 0};

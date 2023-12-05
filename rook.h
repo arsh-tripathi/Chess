@@ -9,7 +9,7 @@ class Rook : public Piece
 {
 
   public:
-    // ctor/dtor
+    // ctor and dtor
     Rook(Coord pos, Colour colour);
     ~Rook();
 

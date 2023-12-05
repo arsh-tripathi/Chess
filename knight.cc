@@ -8,23 +8,16 @@ using namespace std;
 
 static const vector<vector<Coord>> ALLMOVES{{{1, 2}}, {{2, 1}}, {{2, -1}}, {{1, -2}},
                                             {{-1, -2}}, {{-2, -1}}, {{-2, 1}}, {{-1, 2}}};
-// vector<Coord> ALLMOVES;
 
-Knight::Knight(Coord pos, Colour colour) : Piece{pos, colour}
-{
-}
+Knight::Knight(Coord pos, Colour colour) : Piece{pos, colour} {}
 
-Knight::~Knight()
-{
-}
+Knight::~Knight() {}
 
-PieceType Knight::getPieceType()
-{
+PieceType Knight::getPieceType() {
     return PieceType::Knight;
 }
 
-vector<vector<Coord>> Knight::possibleMoves()
-{
+vector<vector<Coord>> Knight::possibleMoves() {
     vector<vector<Coord>> moves;
     for (size_t i = 0; i < ALLMOVES.size(); ++i)
     {
@@ -42,8 +35,7 @@ vector<vector<Coord>> Knight::possibleMoves()
     return moves;
 }
 
-bool Knight::isMovePossible(Coord &c)
-{
+bool Knight::isMovePossible(Coord &c) {
     if (!c.checkBounds())
     {
         // final destination is out of bouinds

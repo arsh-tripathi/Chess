@@ -1,8 +1,7 @@
 #ifndef __COORD_H_
 #define __COORD_H_
 
-class Coord
-{
+class Coord {
     int X;
     int Y;
 

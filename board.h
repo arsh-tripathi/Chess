@@ -29,54 +29,51 @@ using namespace std;
 
 class Board {
 	// fields
-  std::vector<std::vector<Coord>> previousValidMoves;
-
+  	std::vector<std::vector<Coord>> previousValidMoves;
 	UndoInfo undoInfo;
 	std::vector<unique_ptr<Piece>> whitePieces;
 	std::vector<unique_ptr<Piece>> blackPieces;
 
-	shared_ptr<Cell> whiteKing;
+	shared_ptr<Cell> whiteKing; // tracks which square holds king
 	shared_ptr<Cell> blackKing;
 
-	vector<shared_ptr<Cell>> piecesAttackingWhiteKing;
-	vector<shared_ptr<Cell>> piecesAttackingBlackKing;
+	vector<shared_ptr<Cell>> piecesAttackingWhiteKing; // pieces putting king in check
+	vector<shared_ptr<Cell>> piecesAttackingBlackKing; 
 
-    std::vector<std::vector<std::shared_ptr<Cell>>> theBoard;
-    std::shared_ptr<TextDisplay> td = nullptr; // initializabled in some init function
-    Xwindow xw; // xw display
-    std::shared_ptr<GraphicsDisplay> gd = nullptr; // The graphics display
+    std::vector<std::vector<std::shared_ptr<Cell>>> theBoard; // stores board squares
 
-	bool isWhiteMove = true;
-	State status = State::Normal;  // normal, check, checkmate, statemate, resign, invalid
-	int evalScore = 0;			   // white piece points - black piece points
+    Xwindow xw;
+    std::shared_ptr<TextDisplay> td = nullptr;
+    std::shared_ptr<GraphicsDisplay> gd = nullptr;
 
+	bool isWhiteMove = true; // tracks whose move it is
+	State status = State::Normal;  // holds Board's state
+	
+	int evalScore = 0; // holds computer evaulation score
 	bool wasChecked = false;
 	bool stateUpdated = false;
-	// **** undo should decrement move counter => done from notify
-	// undo resets the chessboard back to its state one move ago, as stored in
-	// undoInfo
-	void undo();
+
+	void undo(); // undos a move
 
 	shared_ptr<Cell> getCell(Coord c);
 	Piece *getPiece(Coord c);
 
-	// actually make an enpassant move or return false
-	bool kingMove(Coord curr, Coord dest, bool checkMateType);
-	bool enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, bool checkMateType);
-	bool promotion(Coord curr, Coord dest, bool checkMateType);
+	bool kingMove(Coord curr, Coord dest, bool checkMateType); // handles king moves
+	bool enPassentMove(Coord curr, Coord dest, const Coord capturedPiece, bool checkMateType); // handles en passent move
+	bool promotion(Coord curr, Coord dest, bool checkMateType); // handles pawn promotion
 
-	bool updateState();
+	bool updateState(); // updates Board's state
 
-	void checkForCheck(bool checkMateType);
-	void checkForMate(bool checkMateType);
+	void checkForCheck(bool checkMateType); // checks for discovered checks
+	void checkForMate(bool checkMateType); // checks for possible checkmate/stalemate
 
 	void updateCellObservers(Coord curr, Coord dest, bool checkMateType);
-	// returns non-blocked cells in the given path
-	std::vector<std::shared_ptr<Cell>> pathBlock(Coord curr);
-	// returns true if the path from curr to dest is not blocked
-	bool singlePathBlockCheck(Coord curr, Coord dest);
 
-	void updateEvalScore(Colour col, Piece *piece, State state);
+	std::vector<std::shared_ptr<Cell>> pathBlock(Coord curr); // returns non-blocked square in given path
+
+	bool singlePathBlockCheck(Coord curr, Coord dest); // checks if path from curr to dest is not blocked
+
+	void updateEvalScore(Colour col, Piece *piece, State state); // updates computer evaluation score
 	void updateEvalPromotion();
 
 	friend std::ostream &operator<<(std::ostream &out, const Board &b);
@@ -89,64 +86,39 @@ class Board {
 	friend struct Tree;
 
    public:
-	// ctor/dtor
-
-	// !!! Remember to add/initialize graphics display once everything is complete
+	// ctor and dtor
 	Board();
 	~Board();
-	Board(const Board &other);
-	Board(Board &&other);
-	Board &operator=(Board &other);
-	Board &operator=(Board &&other);
 
-	// methods
+	void placePiece(Colour colour, Coord coord, PieceType pt); // adds piece to board
+	void removePiece(Coord coord); // removes piece at coordinate coord
 
-	// methods
+	void setupDefaultBoard(); // sets up default board
+	bool placedKings(); // checks if both kings have been placed
+	bool noPromoPawns(); // checks if any pawns are on first/last row
+	bool setupCheck(); // checks if either king is in check
 
-	// creates pieces (adds to blackpieces or whitepieces) and places raw pointer
-	// at cell
-	void placePiece(Colour colour, Coord coord, PieceType pt);
+	void updateGraphicsDisplayScore(float whitePlayer, float blackPlayer); // updates display score
 
-	// sets up default chess board by calling placePiece(...)
-	void setupDefaultBoard();
+	void setWhiteTurn(bool white);
+	bool isWhiteTurn(); // checks if it's white's turn
 
-  void removePiece(Coord coord);
-  bool placedKings();
-  bool noPromoPawns();
-  bool setupCheck();
+	bool isPossibleMove(Coord curr, Coord dest, Colour c); // checks if it is possible to legally move the
+														   // piece at curr to dest
 
-  void updateGraphicsDisplayScore(float whitePlayer, float blackPlayer);
-  
-  void setWhiteTurn(bool white);
-	bool isWhiteTurn();
+	void updatePiecesattackingKing(Colour col); // updates the pieces attacking the king of colour col
 
-	void toggleTurn();
+	bool move(Coord curr, Coord dest, bool checkMateType = true); // moves piece at curr to dest
 
-	/**
-	 * Is possible moves checks the following:
-	 *  1) There is a piece of same colour player that is moving at curr
-	 *  2) checks move orientation based on piece at curr and out of bounds
-	 *  3) checks if we capture our own piece
-	 *  4) checks path block
-	 * */
-	bool isPossibleMove(Coord curr, Coord dest, Colour c);
+	bool shortCastle(bool checkMateType); // performs short castle
+	bool longCastle(bool checkMateType); // performs long castle
 
-	// updates the pieces attacking the king of the given colour
-	void updatePiecesattackingKing(Colour col);
-
-	bool move(Coord curr, Coord dest, bool checkMateType = true);
-	// !!!! cannot short castle
-	bool shortCastle(bool checkMateType);
-	// !!!! cannot short castle
-	bool longCastle(bool checkMateType);
 	State getState();
 	int getEvalScore();
-	// returns all the possible moves the current player can make
-	std::vector<std::vector<Coord>> validMoves();
+
+	std::vector<std::vector<Coord>> validMoves(); // returns all possible moves current player can make
 
 };
-
-// overload for testing
 
 std::ostream &operator<<(std::ostream &out, const Board &b);
 

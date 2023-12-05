@@ -6,11 +6,11 @@
 #include "piece.h"
 
 class Cell;
-// move struct
+
 struct UndoInfo {
 	bool enPassant = false;
-	Coord start;  // needs default constructor
-	Coord end;	  // needs default constructor
+	Coord start;
+	Coord end;
 	State status;
 	Piece *originalEndPiece;
 	int previousEvalScore = 0;

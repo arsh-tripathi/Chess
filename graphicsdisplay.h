@@ -30,18 +30,18 @@ class GraphicsDisplay: public Observer {
     void drawBoard();
 
     public:
-    GraphicsDisplay(Xwindow& xw, shared_ptr<TextDisplay> td);
-    ~GraphicsDisplay();
+        GraphicsDisplay(Xwindow& xw, shared_ptr<TextDisplay> td);
+        ~GraphicsDisplay();
 
-    // updates the pieces on the coordinates of c and dest on theDisplay
-    void notify(Cell& c, Cell& dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) override;
-    SubscriptionType subType() override;
+        // updates the pieces on the coordinates of c and dest on theDisplay
+        void notify(Cell& c, Cell& dest, UndoInfo* undoInfo = nullptr, State* state = nullptr) override;
+        SubscriptionType subType() override;
 
-    void updateEntireBoard();
-    void updateScore(float whitePlayer, float blackPlayer);
+        void updateEntireBoard();
+        void updateScore(float whitePlayer, float blackPlayer);
 
-    void setWhiteTurn(bool white);
-    void drawScore();
+        void setWhiteTurn(bool white);
+        void drawScore();
 };
 
 ostream &operator<<(ostream &out, const GraphicsDisplay &gd);
