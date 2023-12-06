@@ -229,16 +229,14 @@ int main(void) {
                 while (cin >> white >> black) {
 					if (white == "human") {
 						p1 = make_shared<Human>(Colour::White);
-					} else if (white == "computer[1]") {
+					} else if (white == "computer1") {
 						p1 = make_shared<LevelOne>(Colour::White);
-					} else if (white == "computer[2]") {
+					} else if (white == "computer2") {
 						p1 = make_shared<LevelTwo>(Colour::White);
-					} else if (white == "computer[3]") {
+					} else if (white == "computer3") {
 						p1 = make_shared<LevelThree>(Colour::White);
-					} else if (white == "computer[4]") {
-						// currently not supported
-						cerr << "Computer[4] is currently not supported" << endl;
-						p1 = make_shared<LevelThree>(Colour::White);
+					} else if (white == "computer4") {
+						p1 = make_shared<LevelFour>(Colour::White);
 					} else {
 						cerr << "Invalid Type of Player!" << endl;
 						continue;
@@ -246,16 +244,14 @@ int main(void) {
 
 					if (black == "human") {
 						p2 = make_shared<Human>(Colour::Black);
-					} else if (black == "computer[1]") {
+					} else if (black == "computer1") {
 						p2 = make_shared<LevelOne>(Colour::Black);
-					} else if (black == "computer[2]") {
+					} else if (black == "computer2") {
 						p2 = make_shared<LevelTwo>(Colour::Black);
-					} else if (black == "computer[3]") {
+					} else if (black == "computer3") {
 						p2 = make_shared<LevelThree>(Colour::Black);
-					} else if (black == "computer[4]") {
-						// currently not supported
-						cerr << "Computer[4] is currently not supported" << endl;
-						p2 = make_shared<LevelThree>(Colour::Black);
+					} else if (black == "computer4") {
+						p2 = make_shared<LevelFour>(Colour::Black);
 					} else {
 						cerr << "Invalid Type of Player!" << endl;
 						continue;

@@ -12,39 +12,68 @@ using namespace std;
 LevelThree::LevelThree(Colour c) : Player{c} {}
 
 bool LevelThree::move() {
-	Tree evalTree{0, Coord{0, 0}, Coord{0, 0}};
-	vector<UndoInfo> undoinfos;
-	undoinfos.emplace_back(b->undoInfo);
+	UndoInfo original{b->undoInfo};
 	vector<vector<Coord>> vmoves = b->validMoves();
 	if (vmoves.size() == 0) {
-		//cerr << "Valid moves is empty for computer" << endl;
+		//cerr << "Valid moves for computer is empty" << endl;
 		return false;
 	}
-
-	// loop through all possible responses by oponent
+	Coord start{0, 0};
+	Coord end{0, 0};
+	// search through all moves and find move that results in best eval score after 1 move
+	int maxeval = -1000;
+	int mineval = 1000;
 	for (size_t i = 0; i < vmoves.size(); ++i) {
-		if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
-		evalTree.addChild(b->getEvalScore(), vmoves[i]);
-		undoinfos.emplace_back(b->undoInfo);
-		if (b->getState() != State::Checkmate || b->getState() != State::Stalemate) {
-			vector<vector<Coord>> childvmoves = b->validMoves();
-			for (size_t j = 0; j < childvmoves.size(); ++j) {
-				if (!b->move(childvmoves[j][0], childvmoves[j][1])) continue;
-				evalTree.children[i]->addChild(b->getEvalScore(), childvmoves[j]);
-				b->undo();
+		if (c == Colour::White) {
+			if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
+			if (maxeval < b->getEvalScore()) {
+				maxeval = b->getEvalScore();
+				start = vmoves[i][0];
+				end = vmoves[i][1];
+			}
+			b->undo();
+		} else {
+			if (!b->move(vmoves[i][0], vmoves[i][1])) continue;
+			if (mineval > b->getEvalScore()) {
+				mineval = b->getEvalScore();
+				start = vmoves[i][0];
+				end = vmoves[i][1];
+			}
+			b->undo();
+		}
+	}
+	if (c == Colour::White) {
+		if (maxeval <= 0) {
+			// try to move a piece to a protected spot
+			for (size_t i = 0; i < vmoves.size(); ++i) {
+				for (size_t j = 0; j < b->whitePieces.size(); ++j) {
+					cout << "J: " << j << endl;
+					if (b->whitePieces[j] && b->whitePieces[j]->getAlive() && !(b->whitePieces[j]->getPos() == vmoves[i][0]) && b->isPossibleMove(b->whitePieces[j]->getPos(), vmoves[i][1], Colour::White)) {
+						start = vmoves[i][0];
+						end = vmoves[i][1];
+					}
+				}
 			}
 		}
-		b->undoInfo = undoinfos[undoinfos.size() - 1];
-		undoinfos.pop_back();
-		b->undo();
+	} else { //black is moving
+		if (mineval >= 0) {
+			// try to move a piece to a protected spot
+			for (size_t i = 0; i < vmoves.size(); ++i) {
+				for (size_t j = 0; j < b->blackPieces.size(); ++j) {
+					if (b->blackPieces[j] && b->blackPieces[j]->getAlive() && !(b->blackPieces[j]->getPos() == vmoves[i][0]) 
+						&& b->isPossibleMove(b->blackPieces[j]->getPos(), vmoves[i][1], Colour::Black)) {
+						start = vmoves[i][0];
+						end = vmoves[i][1];
+					}
+				}
+			}
+		}
 	}
+	// make move
+	b->undoInfo = original;
+	b->move(start, end);
 
-	b->undoInfo = undoinfos[undoinfos.size() - 1];
-	undoinfos.pop_back();
-	vector<Coord> finalmove;
-	if (b->isWhiteTurn()) finalmove = evalTree.MaxMin();
-	else finalmove = evalTree.MinMax();
-	b->move(finalmove[0], finalmove[1]);
+	// updates Turn on graphics display
 	bool whiteTurnParam = c == Colour::Black ? true : false;
 	b->gd->setWhiteTurn(whiteTurnParam);
 	

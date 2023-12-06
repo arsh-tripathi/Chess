@@ -26,11 +26,11 @@ class LevelThree : public Player {
 	void resign() override;
 };
 
-// class LevelFour : public Player {
-//   public:
-//	LevelFour(Colour c);
-//	bool move() override;
-//	void resign() override;
-//};
+class LevelFour : public Player {
+  public:
+	LevelFour(Colour c);
+	bool move() override;
+	void resign() override;
+};
 
 #endif
