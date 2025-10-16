@@ -1,5 +1,5 @@
-# CS246Chess
-Chess Project for CS246
+# Chess
+Chess Project
 
 ## Supports:
 - Normal Piece Moves for all Types of Pieces (Pawn, Rook, Knight, Bishop, Queen, King)
